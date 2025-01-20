@@ -72,6 +72,7 @@ dml_micros()
 
 // Function to generate Gaussian noise using Box-Muller transform
 double gaussian_box_muller() {
+	//This function is no longer used and has been moved to the main function so it could be parallelized
     static XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
     static std::normal_distribution<double> distribution(0.0, 1.0);
     return distribution(generator);
@@ -81,14 +82,24 @@ double gaussian_box_muller() {
 double black_scholes_monte_carlo(ui64 S0, ui64 K, double T, double r, double sigma, double q, ui64 num_simulations) {
     double sum_payoffs = 0.0;
 	//Pour le moment OMP est plus lent...
-	#pragma omp parallel for reduction(+:sum_payoffs)
-    for (ui64 i = 0; i < num_simulations; ++i) {
-        double Z = gaussian_box_muller();
-        double ST = S0 * exp((r - q - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * Z);
-        double payoff = std::max(ST - K, 0.0);
-        sum_payoffs += payoff;
-    }
+
+#pragma omp parallel firstprivate(S0, K, T, r, sigma, q)
+	{
+//I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
+//with the generator private to each thread
+	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
+	std::normal_distribution<double> distribution(0.0, 1.0);
+
+#pragma omp for reduction(+:sum_payoffs)
+	for (ui64 i = 0; i < num_simulations; ++i) {
+		double Z = distribution(generator);
+		double ST = S0 * exp((r - q - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * Z);
+		double payoff = std::max(ST - K, 0.0);
+		sum_payoffs += payoff;
+	}
+};
     return exp(-r * T) * (sum_payoffs / num_simulations);
+
 }
 
 int main(int argc, char* argv[]) {
