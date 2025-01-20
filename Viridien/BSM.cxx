@@ -56,6 +56,7 @@
 #include <algorithm>
 #include <iomanip>   // For setting precision
 #include "XoshiroCpp.hpp"
+#include <omp.h>
 
 #define ui64 u_int64_t
 
@@ -79,6 +80,8 @@ double gaussian_box_muller() {
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
 double black_scholes_monte_carlo(ui64 S0, ui64 K, double T, double r, double sigma, double q, ui64 num_simulations) {
     double sum_payoffs = 0.0;
+	//Pour le moment OMP est plus lent...
+	#pragma omp parallel for reduction(+:sum_payoffs)
     for (ui64 i = 0; i < num_simulations; ++i) {
         double Z = gaussian_box_muller();
         double ST = S0 * exp((r - q - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * Z);
