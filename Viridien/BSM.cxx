@@ -55,6 +55,7 @@
 #include <limits>
 #include <algorithm>
 #include <iomanip>   // For setting precision
+#include "XoshiroCpp.hpp"
 
 #define ui64 u_int64_t
 
@@ -70,7 +71,7 @@ dml_micros()
 
 // Function to generate Gaussian noise using Box-Muller transform
 double gaussian_box_muller() {
-    static std::mt19937 generator(std::random_device{}());
+    static XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
     static std::normal_distribution<double> distribution(0.0, 1.0);
     return distribution(generator);
 }
@@ -119,22 +120,22 @@ int main(int argc, char* argv[]) {
         errors.push_back(relative_error);
 
         // Print the values on one line with precision
-        /*
+        
         std::cout << std::fixed << std::setprecision(6)
                   << "Run " << run + 1 << ": "
                   << "Theoretical Price: " << theoretical_price << ", "
                   << "Actual Price: " << actual_price << ", "
                   << "Difference: " << theoretical_price - actual_price << std::endl; 
-        */
+        
     }
     double t2=dml_micros();
 
-    double min_error     = *std::min_element(errors.begin(), errors.end());
-    double max_error     = *std::max_element(errors.begin(), errors.end());
+    double min_error     =  *std::min_element(errors.begin(), errors.end());
+    double max_error     =  *std::max_element(errors.begin(), errors.end());
     double average_error =  std::accumulate (errors.begin(), errors.end(), 0.0) / errors.size();
 
-    //std::cout << "%Best    Relative Error: " << min_error     * 100 << std::endl;
-    //std::cout << "%Worst   Relative Error: " << max_error     * 100 << std::endl;
+    std::cout << "%Best    Relative Error: " << min_error     * 100 << std::endl;
+    std::cout << "%Worst   Relative Error: " << max_error     * 100 << std::endl;
     std::cout << "%Average Relative Error: " << std::setprecision(9) << average_error * 100 << std::endl;
     std::cout << "Performance in seconds : " << std::setprecision(3) << (t2-t1)/1000000.0   << std::endl;
 
