@@ -58,7 +58,7 @@
 #include "XoshiroCpp.hpp"
 #include <omp.h>
 
-#define ui64 u_int64_t
+#define ui64 u_int32_t
 
 #include <sys/time.h>
 double
@@ -71,30 +71,29 @@ dml_micros()
 }
 
 // Function to generate Gaussian noise using Box-Muller transform
-double gaussian_box_muller() {
+float gaussian_box_muller() {
 	//This function is no longer used and has been moved to the main function so it could be parallelized
     static XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-    static std::normal_distribution<double> distribution(0.0, 1.0);
+    static std::normal_distribution<float> distribution(0.0, 1.0);
     return distribution(generator);
 }
 
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
-double black_scholes_monte_carlo(ui64 S0, ui64 K, double T, double r, double sigma, double q, ui64 num_simulations) {
-    double sum_payoffs = 0.0;
+float black_scholes_monte_carlo(ui64 S0, ui64 K, float T, float r, float sigma, float q, ui64 num_simulations) {
+    float sum_payoffs = 0.0;
 	//Pour le moment OMP est plus lent...
 
 #pragma omp parallel firstprivate(S0, K, T, r, sigma, q)
 	{
-//I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
-//with the generator private to each thread
+//L'init de la distribution est dans la fonction pour pouvoir paralléliser
 	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-	std::normal_distribution<double> distribution(0.0, 1.0);
+	std::normal_distribution<float> distribution(0.0, 1.0);
 
 #pragma omp for reduction(+:sum_payoffs)
 	for (ui64 i = 0; i < num_simulations; ++i) {
-		double Z = distribution(generator);
-		double ST = S0 * exp((r - q - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * Z);
-		double payoff = std::max(ST - K, 0.0);
+		float Z = distribution(generator);
+		float ST = S0 * exp((r - q - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * Z);
+		float payoff = std::max(ST - K, 0.0f);
 		sum_payoffs += payoff;
 	}
 };
@@ -114,10 +113,10 @@ int main(int argc, char* argv[]) {
     // Input parameters
     ui64 S0      = 100;                   // Initial stock price
     ui64 K       = 110;                   // Strike price
-    double T     = 1.0;                   // Time to maturity (1 year)
-    double r     = 0.06;                  // Risk-free interest rate
-    double sigma = 0.2;                   // Volatility
-    double q     = 0.03;                  // Dividend yield
+    float T     = 1.0;                   // Time to maturity (1 year)
+    float r     = 0.06;                  // Risk-free interest rate
+    float sigma = 0.2;                   // Volatility
+    float q     = 0.03;                  // Dividend yield
 
     // Generate a random seed at the start of the program using random_device
     std::random_device rd;
@@ -125,12 +124,12 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
 
-    std::vector<double> errors;
+    std::vector<float> errors;
     double t1=dml_micros();
     for (ui64 run = 0; run < num_runs; ++run) {
-        double theoretical_price = black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
-        double actual_price = black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
-        double relative_error = std::abs(theoretical_price - actual_price) / actual_price;
+        float theoretical_price = black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
+        float actual_price = black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
+        float relative_error = std::abs(theoretical_price - actual_price) / actual_price;
         errors.push_back(relative_error);
 
         // Print the values on one line with precision
@@ -144,9 +143,9 @@ int main(int argc, char* argv[]) {
     }
     double t2=dml_micros();
 
-    double min_error     =  *std::min_element(errors.begin(), errors.end());
-    double max_error     =  *std::max_element(errors.begin(), errors.end());
-    double average_error =  std::accumulate (errors.begin(), errors.end(), 0.0) / errors.size();
+    float min_error     =  *std::min_element(errors.begin(), errors.end());
+    float max_error     =  *std::max_element(errors.begin(), errors.end());
+    float average_error =  std::accumulate (errors.begin(), errors.end(), 0.0) / errors.size();
 
     std::cout << "%Best    Relative Error: " << min_error     * 100 << std::endl;
     std::cout << "%Worst   Relative Error: " << max_error     * 100 << std::endl;
