@@ -92,12 +92,12 @@ float black_scholes_monte_carlo(ui64 S0, ui64 K, float T, float r, float sigma, 
 #pragma omp for reduction(+:sum_payoffs)
 	for (ui64 i = 0; i < num_simulations; ++i) {
 		float Z = distribution(generator);
-		float ST = S0 * exp((r - q - 0.5 * sigma * sigma) * T + sigma * sqrt(T) * Z);
+		float ST = S0 * expf((r - q - 0.5f * sigma * sigma) * T + sigma * sqrtf(T) * Z);
 		float payoff = std::max(ST - K, 0.0f);
 		sum_payoffs += payoff;
 	}
 };
-    return exp(-r * T) * (sum_payoffs / num_simulations);
+    return expf(-r * T) * (sum_payoffs / num_simulations);
 
 }
 
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
 
     float min_error     =  *std::min_element(errors.begin(), errors.end());
     float max_error     =  *std::max_element(errors.begin(), errors.end());
-    float average_error =  std::accumulate (errors.begin(), errors.end(), 0.0) / errors.size();
+    float average_error =  std::accumulate (errors.begin(), errors.end(), 0.0f) / errors.size();
 
     std::cout << "%Best    Relative Error: " << min_error     * 100 << std::endl;
     std::cout << "%Worst   Relative Error: " << max_error     * 100 << std::endl;
