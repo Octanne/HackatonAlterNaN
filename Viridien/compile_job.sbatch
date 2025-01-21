@@ -10,6 +10,6 @@
 module load armpl/24.10.1
 
 # Compilation command
-armclang++ -fopenmp -O3 -ffast-math -march=native -std=c++17 -o BSM BSM.cxx
+armclang++ -g -O3 -DREAL=float -mcpu=native -march=armv8-a+sve -ftree-vectorize -flto -std=c++17 -fopenmp -o BSM BSM.cxx
 
 # End of job script

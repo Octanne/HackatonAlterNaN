@@ -33,4 +33,5 @@
 
 EDF/sudo
 *.sif
+*.swp
 .gitignore

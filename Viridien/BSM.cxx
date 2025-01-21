@@ -104,10 +104,11 @@ dml_micros()
 real gaussian_box_muller() {
 	//This function is no longer used and has been moved to the main function so it could be parallelized
     static XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-    static std::normal_distribution<real> distribution(0.0, 1.0);
+    static boost::normal_distribution<real> distribution(0.0, 1.0);
     return distribution(generator);
 }
 
+/*
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
 real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real q, ui64 num_simulations) {
     real sum_payoffs = 0.0;
@@ -118,9 +119,9 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 //with the generator private to each thread
 	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
 	boost::normal_distribution<real> distribution(0.0, 1.0);
-	//On calcule les parties qui changent pas une seule fois
+//On calcule les parties qui changent pas une seule fois
 	//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
-	real p1 =	(r - q - real(0.5) * sigma * sigma) * T;
+	real p1 =	(r - q - real(0.5f) * sigma * sigma) * T;
 	real p2 = sigma * real_sqrt(T);
 	
 	std::experimental::native_simd<real> p1_vec = p1;
@@ -146,6 +147,51 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
     return real_exp(-r * T) * (sum_payoffs / num_simulations);
 
 }
+*/
+
+#include <arm_neon.h>
+#include "neon_mathfun.h"
+
+real black_scholes_monte_carlo(ui64 S0, ui64 K, real T, real r, real sigma, real q, ui64 num_simulations) {
+    real sum_payoffs = 0.0;
+
+#pragma omp parallel reduction(+:sum_payoffs)
+    {
+        // Initialisation du générateur de nombres aléatoires et des paramètres constants
+        XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
+	boost::normal_distribution<real> distribution(0.0, 1.0);
+
+        real p1 = (r - q - real(0.5f) * sigma * sigma) * T;
+        real p2 = sigma * real_sqrt(T);
+
+        for (ui64 i = 0; i < num_simulations; i += 4) {
+            // Générer 4 nombres aléatoires gaussiens à la fois
+            float Z_array[4] = {
+                distribution(generator),
+                distribution(generator),
+                distribution(generator),
+                distribution(generator),
+            };
+            float32x4_t Z = vld1q_f32(Z_array);
+
+            // Calcul vectorisé de ST pour 4 simulations
+	    float32x4_t ST = vmulq_f32(vdupq_n_f32(S0), exp_ps(vaddq_f32(vdupq_n_f32(p1), vmulq_f32(vdupq_n_f32(p2), Z))));
+
+            // Calcul des payoffs vectorisés
+            float32x4_t payoff = vmaxq_f32(vsubq_f32(ST, vdupq_n_f32(K)), vdupq_n_f32(0.0f));
+
+            // Ajout des payoffs au vecteur de somme
+            float32x2_t sum_low = vget_low_f32(payoff);
+            float32x2_t sum_high = vget_high_f32(payoff);
+	    float total_sum = vaddvq_f32(vcombine_f32(sum_low, sum_high));
+            sum_payoffs += total_sum;
+	}
+    }
+
+    // Retourner le résultat avec la factorisation
+    return real_exp(-r * T) * (sum_payoffs / num_simulations);
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
