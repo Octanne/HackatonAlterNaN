@@ -7,6 +7,6 @@
 #SBATCH --time=00:10:00             # Maximum runtime (adjust as necessary)
 
 # Run the compiled executable
-./BSM 1000000000 10
+./BSM 100000 1000000
 
 # End of job script
