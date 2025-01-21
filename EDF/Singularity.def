@@ -1,47 +1,24 @@
 Bootstrap: docker
-From: centos:7
+From: redhat/ubi8
 
 %help
-    Singularity container for setting up a CentOS 7-based environment for compiling code_aster.
+    Singularity container for setting up a RHEL 8-based environment for compiling code_aster.
 
 %post
-    sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/CentOS-*.repo
-    sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/CentOS-*.repo
-    sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo    
-    yum makecache && yum -y update
+    # Package installation
+    
 
-    yum install -y python3-devel python36-scipy scipy Cython python36-Cython
-    yum install -y\
-    boost169-python3-devel boost169-filesystem boost169-regex \
-    boost169-system boost169-thread boost169-date-time \
-    boost169-chrono boost169-serialization    
-
-    mkdir /opt/aster/boost/{include,lib}
-    ln -s /usr/lib64/libboost* /opt/aster/boost/lib/
-    ln -s libboost_xxx.so.1.69.0 libboost_xxx.so
-
-    yum install -y git gcc gcc-c++ gcc-gfortran cmake3 cmake htop
-    yum groupinstall -y "Development tools"
-    yum install -y numactl numactl-devel
-    yum install -y environment-modules
-    yum install -y perf
-    yum -y update
-    debuginfo-install glibc
-    yum install -y glibc-devel
-    yum install -y perl-IPC-Cmd
-    yum install -y openssl
-    yum install -y ncurses.aarch64 ncurses-compat-libs.aarch64 ncurses-devel.aarch64 ncurses-libs.aarch64
  
     # Clean up
     yum clean all && rm -rf /var/cache/yum/*
 
 %environment
     # Set up the environment variables for compilation
-    source scl_source enable devtoolset-8
-    export PATH=$PATH:/usr/lib64/openmpi/bin
+    #source scl_source enable devtoolset-8
+    #export PATH=$PATH:/usr/lib64/openmpi/bin
 
 %labels
     Maintainer "Your Name <your.email@example.com>"
     Version "1.0"
-    Description "Singularity image for setting up a CentOS 7 environment to compile code_aster."
+    Description "Singularity image for setting up a RHEL 8 environment to compile code_aster."
 
