@@ -117,7 +117,7 @@ real black_scholes_monte_carlo(ui64 S0, ui64 K, real T, real r, real sigma, real
 	real p2 = sigma * real_sqrt(T);
 #pragma omp for reduction(+:sum_payoffs)
 	for (ui64 i = 0; i < num_simulations; ++i) {
-		real Z = distribution(generator);
+		real Z = distribution(generator)
 		real ST = S0 * real_exp(p1 + (p2 * Z));
 		real payoff = std::max(ST - K, real(0.0));
 		sum_payoffs += payoff;
@@ -151,9 +151,19 @@ int main(int argc, char* argv[]) {
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
     real sum = 0.0f;
     double t1=dml_micros();
-#pragma omp parallel for reduction(+:sum)
+    #pragma omp parallel for reduction(+:sum)
     for (ui64 run = 0; run < num_runs; ++run) {
-	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
+	// std::vector<real> random_numbers(num_simulations);
+	// #pragma omp parallel
+	// {
+    	//     XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
+	//     std::normal_distribution<real> distribution(0.0, 1.0);
+    	//     #pragma omp for
+    	//     for (ui64 i = 0; i < num_simulations; ++i) {
+        // 	random_numbers[i] = distribution(generator);
+    	//     }
+	// }
+	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations, random_numbers);
     }
 	
     double t2=dml_micros();
