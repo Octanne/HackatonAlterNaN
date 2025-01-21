@@ -150,6 +150,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
     real sum = 0.0f;
     double t1=dml_micros();
+#pragma omp parallel for reduction(+:sum)
     for (ui64 run = 0; run < num_runs; ++run) {
 	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
     }
