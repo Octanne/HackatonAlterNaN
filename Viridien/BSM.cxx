@@ -110,11 +110,14 @@ real black_scholes_monte_carlo(ui64 S0, ui64 K, real T, real r, real sigma, real
 //with the generator private to each thread
 	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
 	std::normal_distribution<real> distribution(0.0, 1.0);
-
+	//On calcule les parties qui changent pas une seule fois
+	//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
+	real p1 =	(r - q - real(0.5) * sigma * sigma) * T;
+	real p2 = sigma * real_sqrt(T);
 #pragma omp for reduction(+:sum_payoffs)
 	for (ui64 i = 0; i < num_simulations; ++i) {
 		real Z = distribution(generator);
-		real ST = S0 * real_exp((r - q - real(0.5) * sigma * sigma) * T + sigma * real_sqrt(T) * Z);
+		real ST = S0 * real_exp(p1 + (p2 * Z));
 		real payoff = std::max(ST - K, real(0.0));
 		sum_payoffs += payoff;
 	}
