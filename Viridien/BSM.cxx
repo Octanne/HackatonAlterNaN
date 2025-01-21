@@ -148,17 +148,15 @@ int main(int argc, char* argv[]) {
     unsigned long long global_seed = rd();  // This will be the global seed
 
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
-
-    std::vector<real> errors;
-	real sum = 0.0;
+    real sum = 0.0f;
     double t1=dml_micros();
     for (ui64 run = 0; run < num_runs; ++run) {
-		sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
-	}
+	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
+    }
 	
     double t2=dml_micros();
 		
-	std::cout << std::fixed << std::setprecision(6) << " value= " << sum/num_runs << " in " << (t2-t1)/1000000.0 << " seconds" << std::endl;
+    std::cout << std::fixed << std::setprecision(6) << " value= " << sum/num_runs << " in " << (t2-t1)/1000000.0 << " seconds" << std::endl;
 
     std::cout << "Performance in seconds : " << std::setprecision(3) << (t2-t1)/1000000.0   << std::endl;
 

@@ -10,6 +10,6 @@
 module load armpl/24.10.1
 
 # Compilation command
-armclang++ -O3 -std=c++17 -o BSM BSM.cxx
+armclang++ -fopenmp -O3 -march=native -std=c++17 -o BSM BSM.cxx
 
 # End of job script
