@@ -57,6 +57,7 @@
 #include <iomanip>   // For setting precision
 #include "XoshiroCpp.hpp"
 #include <omp.h>
+#include <boost/random.hpp>
 
 #define ui64 u_int64_t
 
@@ -109,7 +110,7 @@ real black_scholes_monte_carlo(ui64 S0, ui64 K, real T, real r, real sigma, real
 //I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
 //with the generator private to each thread
 	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-	std::normal_distribution<real> distribution(0.0, 1.0);
+	boost::normal_distribution<real> distribution(0.0, 1.0);
 	//On calcule les parties qui changent pas une seule fois
 	//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
 	real p1 =	(r - q - real(0.5) * sigma * sigma) * T;
