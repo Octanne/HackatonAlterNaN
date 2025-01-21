@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(Viridien)
 
 
-add_compile_options(-O3 -DREAL=float)
+add_compile_options(-O3 -g -DREAL=float)
 
 set(CMAKE_CXX_STANDARD 17)
 
