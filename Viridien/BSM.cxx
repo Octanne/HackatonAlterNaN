@@ -58,8 +58,6 @@
 #include "XoshiroCpp.hpp"
 #include <omp.h>
 #include <boost/random.hpp>
-#include <immintrin.h>
-#include <x86intrin.h>
 #include <experimental/simd>
 
 #define ui64 u_int64_t
