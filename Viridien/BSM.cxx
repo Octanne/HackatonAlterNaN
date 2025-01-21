@@ -58,11 +58,18 @@
 #include "XoshiroCpp.hpp"
 #include <omp.h>
 #include <boost/random.hpp>
+#include <immintrin.h>
+#include <x86intrin.h>
+#include <experimental/simd>
 
 #define ui64 u_int64_t
 
 #ifndef REAL
 #define REAL double
+#endif
+
+#ifndef INSTRUCTION
+#define INSTRUCTION ARM
 #endif
 
 using real = REAL;
@@ -83,6 +90,8 @@ inline real real_exp(real x) {
 	}
 }
 
+
+
 #include <sys/time.h>
 double
 dml_micros()
@@ -102,7 +111,7 @@ real gaussian_box_muller() {
 }
 
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
-real black_scholes_monte_carlo(ui64 S0, ui64 K, real T, real r, real sigma, real q, ui64 num_simulations) {
+real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real q, ui64 num_simulations) {
     real sum_payoffs = 0.0;
 
 #pragma omp parallel firstprivate(S0, K, T, r, sigma, q)
@@ -115,13 +124,26 @@ real black_scholes_monte_carlo(ui64 S0, ui64 K, real T, real r, real sigma, real
 	//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
 	real p1 =	(r - q - real(0.5) * sigma * sigma) * T;
 	real p2 = sigma * real_sqrt(T);
+	
+	std::experimental::native_simd<real> p1_vec = p1;
+	std::experimental::native_simd<real> p2_vec = p2;
+	
+	std::experimental::native_simd<real> payoffs;
+	
+	std::experimental::native_simd<real> S0_vec = S0;
+	std::experimental::native_simd<real> K_vec = K;
+	std::experimental::native_simd<real> O_vec = 0.0f;
+
+
+
 #pragma omp for reduction(+:sum_payoffs)
-	for (ui64 i = 0; i < num_simulations; ++i) {
-		real Z = distribution(generator)
-		real ST = S0 * real_exp(p1 + (p2 * Z));
-		real payoff = std::max(ST - K, real(0.0));
-		sum_payoffs += payoff;
-	}
+		for (ui64 i = 0; i < num_simulations; i += 4) {
+			std::experimental::native_simd<real> Z = distribution(generator);
+//			real Z = distribution(generator);
+			std::experimental::native_simd<real> ST = S0_vec * std::experimental::exp(p1_vec + (p2_vec * Z));
+			std::experimental::native_simd<real> payoff = std::experimental::max(ST - K_vec, O_vec);
+			sum_payoffs += std::experimental::reduce(payoff);
+		}
 };
     return real_exp(-r * T) * (sum_payoffs / num_simulations);
 
@@ -137,8 +159,8 @@ int main(int argc, char* argv[]) {
     ui64 num_runs        = std::stoull(argv[2]);
 
     // Input parameters
-    ui64 S0      = 100;                   // Initial stock price
-    ui64 K       = 110;                   // Strike price
+    real S0      = 100;                   // Initial stock price
+    real K       = 110;                   // Strike price
     real T     = 1.0;                   // Time to maturity (1 year)
     real r     = 0.06;                  // Risk-free interest rate
     real sigma = 0.2;                   // Volatility
@@ -163,7 +185,7 @@ int main(int argc, char* argv[]) {
         // 	random_numbers[i] = distribution(generator);
     	//     }
 	// }
-	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations, random_numbers);
+	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
     }
 	
     double t2=dml_micros();
