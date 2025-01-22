@@ -114,7 +114,7 @@ RUN sed -i '50i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFIN
 # Start compilation
 #RUN export DISTR=debian-11 ; \
 #    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 check ; \
-#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 setup_env ; \
+#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 setup_venv ; \
 #    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
