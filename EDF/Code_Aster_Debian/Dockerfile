@@ -9,6 +9,9 @@ ENV LANG=C.UTF-8
 RUN apt-get update && apt-get upgrade -y && \
     apt install -y \
     cmake \
+    metis \
+    libmetis5 \
+    libmetis-dev \
     apt-utils \
     aspell \
     aspell-fr \
@@ -86,7 +89,7 @@ codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz && \
 WORKDIR /root/codeaster-prerequisites-${VERSION_CAS}-oss
 
 # Start compilation
-#RUN make ROOT=/opt/aster ARCH=g++-openblas-ompi RESTRICTED=0
+#RUN make ROOT=/opt/aster ARCH=g++-openblas-ompi4 RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc-atlas-ompi RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc10-openblas-seq
 
