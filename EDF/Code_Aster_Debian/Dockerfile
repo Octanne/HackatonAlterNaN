@@ -96,6 +96,9 @@ RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = 
 # We replace medium -mcmodel by large because medium not support in ARM gfortran
 RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
 
+# We add -Wno-narrowing on CMakeLists of INTERP_KERNEL
+RUN sed -i '50i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
+
 # Start compilation
 #RUN make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc-atlas-ompi RESTRICTED=0
