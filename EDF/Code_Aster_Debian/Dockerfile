@@ -73,18 +73,9 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/tmp/*
 
-# We set PATH
+# We set ENV VARS
 ENV VERSION_CAS=20240327
-ENV PATH=/opt/venv/bin:${PATH}
 ENV WRKDIR=/root/codeaster-prerequisites-${VERSION_CAS}-oss
-
-# We set PYTHON
-RUN \
-    python3 -m venv --system-site-packages /opt/venv ; \
-    python3 -m pip install --upgrade pip ; \
-    python3 -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt ; \
-    mpi4py_spec=$(. ${WRKDIR}/VERSION ; printf "mpi4py==${MPI4PY}") ; \
-    python3 -m pip install "${mpi4py_spec}"
 
 # Building code_aster prerequisites
 RUN mkdir -p /opt/aster && \
@@ -95,12 +86,21 @@ RUN mkdir -p /root/dev/codeaster
 WORKDIR /root/dev/codeaster
 RUN git clone https://gitlab.com/codeaster/src.git
 
-WORKDIR /root
 # Download and untar codeaster-prerequisites-VERSION-oss
+WORKDIR /root
 RUN wget https://www.code-aster.org/FICHIERS/prerequisites/\
 codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz && \
 	tar xzf codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
 WORKDIR ${WRKDIR}
+
+# We set PYTHON
+ENV PATH=/opt/venv/bin:${PATH}
+RUN \
+    python3 -m venv --system-site-packages /opt/venv ; \
+    python3 -m pip install --upgrade pip ; \
+    python3 -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt ; \
+    mpi4py_spec=$(. ${WRKDIR}/VERSION ; printf "mpi4py==${MPI4PY}") ; \
+    python3 -m pip install "${mpi4py_spec}"
 
 # We activate the use of system libmetis-dev
 RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line was been uncommented|' src/mumps.sh
