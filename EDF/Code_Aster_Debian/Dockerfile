@@ -119,17 +119,17 @@ RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFIN
 
 # Start compilation
 #RUN export DISTR=debian-11 ; \
-#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
-#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
-#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
+RUN make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
+    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
+    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
-#WORKDIR /root/dev/codeaster
-#RUN . /opt/aster/*/*/*_mpi.sh && \
-#	cd $HOME/dev/codeaster/src && \
-#	./configure --prefix=/opt/aster/install/mpi && \
-#	cd $HOME/dev/codeaster/src && \
-#	make
+WORKDIR /root/dev/codeaster
+RUN . /opt/aster/*/*/*_mpi.sh && \
+	cd $HOME/dev/codeaster/src && \
+	./configure --prefix=/opt/aster/install/mpi && \
+	cd $HOME/dev/codeaster/src && \
+	make
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
