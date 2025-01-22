@@ -80,12 +80,13 @@ RUN echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list.
 RUN echo "Package: *\nPin: release o=Debian,a=sid\nPin-Priority: 100" > /etc/apt/preferences.d/sid
 # Update package lists
 RUN apt-get update && \
-    apt-get install -t sid -y gcc-13 cpp-13 g++-13 gfortran-13 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 30 && \
-    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-13 30 && \
+    apt-get install -t sid -y gcc-14 cpp-14 g++-14 gfortran-14 \
+    clang-14 clang-format-14 libomp-14-dev && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 40 && \
+    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-14 40 && \
     rm /usr/bin/cpp && rm /etc/alternatives/cpp && \
-    update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-13 30 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 30
+    update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-14 40 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 40
 
 # We set ENV VARS
 ENV VERSION_CAS=20240327
@@ -117,22 +118,23 @@ RUN \
     python3 -m pip install "${mpi4py_spec}"
 
 # We activate the use of system libmetis-dev
-RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line was been uncommented|' src/mumps.sh
+RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line has been uncommented|' src/mumps.sh
 
+# Compile en gcc-12 mais test marche pas => test en GCC-13 sans activé cette modif
 # We replace medium -mcmodel by large because medium not support in ARM gfortran
-#RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
+#RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=large/g" src/Makefile.inc' src/miss3d.sh
 
 # We add -Wno-narrowing on CMakeLists of INTERP_KERNEL
 RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
-#RUN export DISTR=debian-12 ; \
-#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
-#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
-#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
+RUN export DISTR=debian-12 ; \
+    make ROOT=/opt/aster ARCH=gcc14-openblas-ompi4 RESTRICTED=0 check ; \
+    make ROOT=/opt/aster ARCH=gcc14-openblas-ompi4 RESTRICTED=0 setup_venv ; \
+    make ROOT=/opt/aster ARCH=gcc14-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
-#WORKDIR /root/dev/codeaster
+WORKDIR /root/dev/codeaster
 #RUN . /opt/aster/*/*/*_mpi.sh && \
 #    cd $HOME/dev/codeaster/src && \
 #    ./waf configure --prefix=/opt/aster/install/mpi && \
