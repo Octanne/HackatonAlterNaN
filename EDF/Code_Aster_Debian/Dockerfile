@@ -73,6 +73,19 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/tmp/*
 
+# We set PATH
+ENV VERSION_CAS=20240327
+ENV PATH=/opt/venv/bin:${PATH}
+ENV WRKDIR=/root/codeaster-prerequisites-${VERSION_CAS}-oss
+
+# We set PYTHON
+RUN \
+    python3 -m venv --system-site-packages /opt/venv ; \
+    python3 -m pip install --upgrade pip ; \
+    python3 -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt ; \
+    mpi4py_spec=$(. ${WRKDIR}/VERSION ; printf "mpi4py==${MPI4PY}") ; \
+    python3 -m pip install "${mpi4py_spec}"
+
 # Building code_aster prerequisites
 RUN mkdir -p /opt/aster && \
 	chown $(id -nu):$(id -ng) /opt/aster -R
@@ -83,12 +96,11 @@ WORKDIR /root/dev/codeaster
 RUN git clone https://gitlab.com/codeaster/src.git
 
 WORKDIR /root
-ENV VERSION_CAS=20240327
-# Download and untar codeaster-prerequisites-20240327-oss
+# Download and untar codeaster-prerequisites-VERSION-oss
 RUN wget https://www.code-aster.org/FICHIERS/prerequisites/\
 codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz && \
 	tar xzf codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
-WORKDIR /root/codeaster-prerequisites-${VERSION_CAS}-oss
+WORKDIR ${WRKDIR}
 
 # We activate the use of system libmetis-dev
 RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line was been uncommented|' src/mumps.sh
@@ -100,9 +112,10 @@ RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' sr
 RUN sed -i '50i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
-#RUN make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0
-#RUN make ROOT=/opt/aster ARCH=gcc-atlas-ompi RESTRICTED=0
-#RUN make ROOT=/opt/aster ARCH=gcc10-openblas-seq
+#RUN export DISTR=debian-11 ; \
+#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 check ; \
+#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 setup_env ; \
+#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
 #WORKDIR /root/dev/codeaster
