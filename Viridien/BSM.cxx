@@ -100,6 +100,22 @@ inline real real_exp(real x) {
 	}
 }
 
+inline real real_cos(real x) {
+	if constexpr(std::is_same_v<real, double>) {
+		return cos(x);
+	} else if constexpr(std::is_same_v<real, float>) {
+		return cosf(x);
+	}
+}
+
+inline real real_log(real x) {
+	if constexpr(std::is_same_v<real, double>) {
+		return log(x);
+	} else if constexpr(std::is_same_v<real, float>) {
+		return logf(x);
+	}
+}
+
 
 
 #include <sys/time.h>
@@ -112,13 +128,6 @@ dml_micros()
         return((tv.tv_sec*1000000.0)+tv.tv_usec);
 }
 
-// Function to generate Gaussian noise using Box-Muller transform
-real gaussian_box_muller() {
-	//This function is no longer used and has been moved to the main function so it could be parallelized
-    static XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-    static boost::normal_distribution<real> distribution(0.0, 1.0);
-    return distribution(generator);
-}
 
 
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
@@ -148,9 +157,20 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 #pragma omp for reduction(+:sum_payoffs)
 		for (ui64 i = 0; i < num_simulations; i += SIMD_WIDTH) {
 			std::experimental::native_simd<real> Z;
+			std::experimental::native_simd<real> Z_p1;
+			std::experimental::native_simd<real> Z_p2;
+			
 			for (int j = 0; j < SIMD_WIDTH; ++j) {
-				Z[j] = distribution(generator);
+				//generate without distribution using the generator
+				Z_p1[j] = real(generator());
+				Z_p2[j] = real(generator());
 			}
+			//Box Muller transform to generate Gaussian noise from uniform noise
+			Z_p2 *= (real)2.0;
+			Z_p2 *= (real)M_PI;
+			Z = real_sqrt(-2.0 * std::experimental::log(Z_p1)) * std::experimental::cos(Z_p2);
+			
+
 //			real Z = distribution(generator);
 			std::experimental::native_simd<real> ST = S0_vec * std::experimental::exp(p1_vec + (p2_vec * Z));
 			std::experimental::native_simd<real> payoff = std::experimental::max(ST - K_vec, O_vec);
