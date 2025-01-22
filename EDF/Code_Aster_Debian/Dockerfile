@@ -134,5 +134,8 @@ RUN . /opt/aster/*/*/*_mpi.sh && \
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-CMD ["/bin/bash"]
+# Check if installation pass Validation
+WORKDIR /root
+RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3
 
+CMD ["/bin/bash"]
