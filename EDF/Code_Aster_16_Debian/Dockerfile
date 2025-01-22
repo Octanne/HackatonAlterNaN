@@ -75,18 +75,18 @@ RUN apt-get update && apt-get upgrade -y && \
 
 # Setup GCC et FORTRAN 13
 # Add the sid repository
-RUN echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+#RUN echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
 # Create a pinning file for low priority
-RUN echo "Package: *\nPin: release o=Debian,a=sid\nPin-Priority: 100" > /etc/apt/preferences.d/sid
+#RUN echo "Package: *\nPin: release o=Debian,a=sid\nPin-Priority: 100" > /etc/apt/preferences.d/sid
 # Update package lists
-RUN apt-get update && \
-    apt-get install -t sid -y gcc-13 cpp-13 g++-13 gfortran-13 \
-    clang-13 clang-format-13 libomp-13-dev && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 40 && \
-    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-13 40 && \
-    rm /usr/bin/cpp && rm /etc/alternatives/cpp && \
-    update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-13 40 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 40
+#RUN apt-get update && \
+#    apt-get install -t sid -y gcc-13 cpp-13 g++-13 gfortran-13 \
+#    clang-13 clang-format-13 libomp-13-dev && \
+#    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 40 && \
+#    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-13 40 && \
+#    rm /usr/bin/cpp && rm /etc/alternatives/cpp && \
+#    update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-13 40 && \
+#    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 40
 
 # We set ENV VARS
 ENV VERSION_CAS=20221225
@@ -120,9 +120,11 @@ RUN \
 # We activate the use of system libmetis-dev
 RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line has been uncommented|' src/mumps.sh
 
-# Compile en gcc-12 et 13 mais test marche pas => test en GCC-14 sans activé cette modif
 # We replace medium -mcmodel by large because medium not support in ARM gfortran
-RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
+#RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
+
+# Compile TFEL System
+#RUN sed -i '53i sed -i "11i set(CMAKE_CXX_FLAGS \\"\\${CMAKE_CXX_FLAGS} -fpermissive\\")" $(pwd)/../src/System/CMakeLists.txt' src/mfront.sh
 
 # We add -Wno-narrowing on CMakeLists of INTERP_KERNEL
 RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
@@ -131,20 +133,20 @@ RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFIN
 #RUN export DISTR=debian-12 ; \
 #   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
 #   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
-RUN make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
+#   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
-WORKDIR /root/dev/codeaster
-RUN . /opt/aster/*/*/*_mpi.sh && \
-    cd $HOME/dev/codeaster/src && \
-    ./waf configure --prefix=/opt/aster/install/mpi && \
-    ./waf install -j $(nproc)
+#WORKDIR /root/dev/codeaster
+#RUN . /opt/aster/*/*/*_mpi.sh && \
+#    cd $HOME/dev/codeaster/src && \
+#    ./waf configure --prefix=/opt/aster/install/mpi && \
+#    ./waf install -j $(nproc)
 
 # Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+#RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Check if installation pass Validation
-WORKDIR /root
-RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3 ; exit 0
+#WORKDIR /root
+#RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3 ; exit 0
 
 CMD ["/bin/bash"]
