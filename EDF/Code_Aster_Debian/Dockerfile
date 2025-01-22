@@ -97,7 +97,7 @@ RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = 
 RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
 
 # Start compilation
-#RUN make ROOT=/opt/aster ARCH=gcc-openblas-ompi4 RESTRICTED=0
+#RUN make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc-atlas-ompi RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc10-openblas-seq
 
