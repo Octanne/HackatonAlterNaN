@@ -88,6 +88,12 @@ codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz && \
 	tar xzf codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
 WORKDIR /root/codeaster-prerequisites-${VERSION_CAS}-oss
 
+# We activate the use of system libmetis-dev
+RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line was been uncommented|' src/mumps.sh
+
+# We replace medium -mcmodel by large because medium not support in ARM gfortran
+RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=large/g" src/Makefile.inc' src/miss3d.sh
+
 # Start compilation
 #RUN make ROOT=/opt/aster ARCH=g++-openblas-ompi4 RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc-atlas-ompi RESTRICTED=0
