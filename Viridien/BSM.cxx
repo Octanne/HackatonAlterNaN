@@ -168,7 +168,10 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 			//Box Muller transform to generate Gaussian noise from uniform noise
 			Z_p2 *= (real)2.0;
 			Z_p2 *= (real)M_PI;
-			Z = real_sqrt(-2.0 * std::experimental::log(Z_p1)) * std::experimental::cos(Z_p2);
+			for (int j = 0; j < SIMD_WIDTH; ++j) {
+				Z_p2[j] = real_cos(Z_p2[j]);
+			}
+			Z = std::experimental::sqrt(real(-2.0) * std::experimental::log(Z_p1)) * Z_p2;
 			
 
 //			real Z = distribution(generator);
@@ -199,7 +202,7 @@ int main(int argc, char* argv[]) {
     real q     = 0.03;                  // Dividend yield
 
     // Generate a random seed at the start of the program using random_device
-    boost::random_device rd;
+    std::random_device rd;
     unsigned long long global_seed = rd();  // This will be the global seed
 
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
