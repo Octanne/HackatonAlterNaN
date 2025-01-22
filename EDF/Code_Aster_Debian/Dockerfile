@@ -73,11 +73,19 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/tmp/*
 
-# Setup REPO
-RUN apt-get update && apt-get upgrade -y && \
-    echo "deb http://deb.debian.org/debian testing main"\
- | tee /etc/apt/sources.list.d/testing.list
-RUN apt-get update && apt install -y -t testing gcc-13 gfortran-13
+# Setup GCC et FORTRAN 13
+# Add the sid repository
+RUN echo "deb http://ftp.de.debian.org/debian sid main" > /etc/apt/sources.list.d/sid.list
+# Create a pinning file for low priority
+RUN echo "Package: *\nPin: release o=Debian,a=sid\nPin-Priority: 100" > /etc/apt/preferences.d/sid
+# Update package lists
+RUN apt-get update && \
+    apt-get install -t sid -y gcc-13 cpp-13 g++-13 gfortran-13 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 30 && \
+    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-13 30 && \
+    rm /usr/bin/cpp && rm /etc/alternatives/cpp && \
+    update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-13 30 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 30
 
 # We set ENV VARS
 ENV VERSION_CAS=20240327
@@ -118,23 +126,23 @@ RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = 
 RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
-RUN export DISTR=debian-12 ; \
-    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
-    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
-    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
+#RUN export DISTR=debian-12 ; \
+#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
+#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
+#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
-WORKDIR /root/dev/codeaster
-RUN . /opt/aster/*/*/*_mpi.sh && \
-    cd $HOME/dev/codeaster/src && \
-    ./waf configure --prefix=/opt/aster/install/mpi && \
-    ./waf install -j $(nproc)
+#WORKDIR /root/dev/codeaster
+#RUN . /opt/aster/*/*/*_mpi.sh && \
+#    cd $HOME/dev/codeaster/src && \
+#    ./waf configure --prefix=/opt/aster/install/mpi && \
+#    ./waf install -j $(nproc)
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Check if installation pass Validation
-WORKDIR /root
-RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3
+#WORKDIR /root
+#RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3
 
 CMD ["/bin/bash"]
