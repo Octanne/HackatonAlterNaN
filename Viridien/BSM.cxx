@@ -67,6 +67,7 @@ You need to tune and parallelize the code to run for large # of simulations
 #include "XoshiroCpp.hpp"
 #include <omp.h>
 #include <boost/random.hpp>
+#include <boost/nondet_random.hpp>
 #include <experimental/simd>
 
 #define ui64 u_int64_t
@@ -124,10 +125,10 @@ real gaussian_box_muller() {
 real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real q, ui64 num_simulations) {
     real sum_payoffs = 0.0;
 
-#pragma omp parallel firstprivate(S0, K, T, r, sigma, q)
+#pragma omp parallel
 	{
 //I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
-//with the generator private to each thread
+//with the generator private to each threadi
 	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
 	boost::normal_distribution<real> distribution(0.0, 1.0);
 //On calcule les parties qui changent pas une seule fois
@@ -160,9 +161,6 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 
 }
 
-
-
-
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <num_simulations> <num_runs>" << std::endl;
@@ -181,7 +179,7 @@ int main(int argc, char* argv[]) {
     real q     = 0.03;                  // Dividend yield
 
     // Generate a random seed at the start of the program using random_device
-    std::random_device rd;
+    boost::random_device rd;
     unsigned long long global_seed = rd();  // This will be the global seed
 
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
