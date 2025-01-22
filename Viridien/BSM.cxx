@@ -81,6 +81,8 @@ You need to tune and parallelize the code to run for large # of simulations
 
 using real = REAL;
 
+#define SIMD_WIDTH sizeof(std::experimental::native_simd<real>) / sizeof(real)
+
 inline real real_sqrt(real x) {
 	if constexpr(std::is_same_v<real, double>) {
 		return sqrt(x);
@@ -143,9 +145,9 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 
 
 #pragma omp for reduction(+:sum_payoffs)
-		for (ui64 i = 0; i < num_simulations; i += 4) {
+		for (ui64 i = 0; i < num_simulations; i += SIMD_WIDTH) {
 			std::experimental::native_simd<real> Z;
-			for (int j = 0; j < 4; ++j) {
+			for (int j = 0; j < SIMD_WIDTH; ++j) {
 				Z[j] = distribution(generator);
 			}
 //			real Z = distribution(generator);
