@@ -1,18 +1,9 @@
 # Start with an Ubuntu base image
-FROM debian:11
+FROM debian:12
 
 # Set environment variables for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
-
-# Setup REPO
-RUN apt-get update && apt-get upgrade -y && \
-    echo "deb http://deb.debian.org/debian testing main"\
- | tee /etc/apt/sources.list.d/testing.list &&\
-echo -e "Package: *\nPin: release a=testing\nPin-Priority: 100"\
- | tee /etc/apt/preferences.d/testing
-RUN apt-get update && apt install -y -t testing gcc-13 gfortran-13
-
 
 # Install apt packages requirement
 RUN apt-get update && apt-get upgrade -y && \
@@ -82,6 +73,12 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/tmp/*
 
+# Setup REPO
+RUN apt-get update && apt-get upgrade -y && \
+    echo "deb http://deb.debian.org/debian testing main"\
+ | tee /etc/apt/sources.list.d/testing.list
+RUN apt-get update && apt install -y -t testing gcc-13 gfortran-13
+
 # We set ENV VARS
 ENV VERSION_CAS=20240327
 ENV WRKDIR=/root/codeaster-prerequisites-${VERSION_CAS}-oss
@@ -118,13 +115,13 @@ RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = 
 RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
 
 # We add -Wno-narrowing on CMakeLists of INTERP_KERNEL
-RUN sed -i '50i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
+RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
 #RUN export DISTR=debian-11 ; \
-#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 check ; \
-#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0 setup_venv ; \
-#    make ROOT=/opt/aster ARCH=gcc10-openblas-ompi4 RESTRICTED=0
+#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
+#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
+#    make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
 #WORKDIR /root/dev/codeaster
