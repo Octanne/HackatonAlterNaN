@@ -127,7 +127,7 @@ RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' sr
 #RUN sed -i '53i sed -i "11i set(CMAKE_CXX_FLAGS \\"\\${CMAKE_CXX_FLAGS} -fpermissive\\")" $(pwd)/../src/System/CMakeLists.txt' src/mfront.sh
 
 # We add -Wno-narrowing on CMakeLists of INTERP_KERNEL
-RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
+RUN sed -i '45i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
 RUN export DISTR=debian-12 ; \
