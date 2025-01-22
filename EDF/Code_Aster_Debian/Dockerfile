@@ -8,6 +8,7 @@ ENV LANG=C.UTF-8
 # Install apt packages requirement
 RUN apt-get update && apt-get upgrade -y && \
     apt install -y \
+    cmake \
     apt-utils \
     aspell \
     aspell-fr \
