@@ -5,6 +5,15 @@ FROM debian:11
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
+# Setup REPO
+RUN apt-get update && apt-get upgrade -y && \
+    echo "deb http://deb.debian.org/debian testing main"\
+ | tee /etc/apt/sources.list.d/testing.list &&\
+echo -e "Package: *\nPin: release a=testing\nPin-Priority: 100"\
+ | tee /etc/apt/preferences.d/testing
+RUN apt-get update && apt install -y -t testing gcc-13 gfortran-13
+
+
 # Install apt packages requirement
 RUN apt-get update && apt-get upgrade -y && \
     apt install -y \
