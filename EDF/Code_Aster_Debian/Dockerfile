@@ -8,7 +8,6 @@ ENV LANG=C.UTF-8
 # Install apt packages requirement
 RUN apt-get update && apt-get upgrade -y && \
     apt install -y \
-    cmake \
     metis \
     libmetis5 \
     libmetis-dev \
@@ -18,7 +17,9 @@ RUN apt-get update && apt-get upgrade -y && \
     bash-completion \
     bison \
     ccache \
-    clang-format \
+    clang-13 \
+    clang-format-13 \
+    cmake \
     curl \
     flex \
     g++ \
@@ -40,6 +41,7 @@ RUN apt-get update && apt-get upgrade -y && \
     libboost-thread-dev \
     libglu1-mesa \
     libncurses5 \
+    libomp-13-dev \
     libopenblas-dev \
     libopenmpi-dev \
     libunwind-dev \
@@ -92,10 +94,10 @@ WORKDIR /root/codeaster-prerequisites-${VERSION_CAS}-oss
 RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line was been uncommented|' src/mumps.sh
 
 # We replace medium -mcmodel by large because medium not support in ARM gfortran
-RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=large/g" src/Makefile.inc' src/miss3d.sh
+RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
 
 # Start compilation
-#RUN make ROOT=/opt/aster ARCH=g++-openblas-ompi4 RESTRICTED=0
+#RUN make ROOT=/opt/aster ARCH=gcc-openblas-ompi4 RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc-atlas-ompi RESTRICTED=0
 #RUN make ROOT=/opt/aster ARCH=gcc10-openblas-seq
 
