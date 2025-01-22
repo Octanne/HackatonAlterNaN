@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(Viridien)
 
 
-add_compile_options(-O3 -g -DREAL=float -fopt-info-vec-missed)
+add_compile_options(-O3 -g -DREAL=float -fopt-info-vec-missed -ffast-math -funsafe-math-optimizations)
 
 set(CMAKE_CXX_STANDARD 17)
 

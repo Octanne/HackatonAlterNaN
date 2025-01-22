@@ -68,6 +68,7 @@ You need to tune and parallelize the code to run for large # of simulations
 #include <omp.h>
 #include <boost/random.hpp>
 #include <experimental/simd>
+#include "fastexp.cpp"
 
 #define ui64 u_int64_t
 
@@ -148,8 +149,14 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 			for (int j = 0; j < 4; ++j) {
 				Z[j] = distribution(generator);
 			}
-//			real Z = distribution(generator);
-			std::experimental::native_simd<real> ST = S0_vec * std::experimental::exp(p1_vec + (p2_vec * Z));
+			std::experimental::native_simd<real> toExp = p1_vec + (p2_vec * Z);
+			std::experimental::native_simd<real> exp;
+			for (int j = 0; j < 4; ++j) {
+				exp[j] = fastexp::exp(real(toExp[j]));
+			}
+			//			real Z = distribution(generator);
+//			real vec = std::experimental::exp(p1_vec + (p2_vec * Z));
+			std::experimental::native_simd<real> ST = S0_vec * exp;
 			std::experimental::native_simd<real> payoff = std::experimental::max(ST - K_vec, O_vec);
 			sum_payoffs += std::experimental::reduce(payoff);
 		}
