@@ -143,14 +143,11 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
 	std::experimental::native_simd<real> K_vec = K;
 	std::experimental::native_simd<real> O_vec = 0.0f;
 
-
-
 #pragma omp for reduction(+:sum_payoffs)
 		for (ui64 i = 0; i < num_simulations; i += SIMD_WIDTH) {
 			std::experimental::native_simd<real> Z;
-			for (int j = 0; j < SIMD_WIDTH; ++j) {
+			for (int j = 0; j < SIMD_WIDTH; ++j)
 				Z[j] = distribution(generator);
-			}
 //			real Z = distribution(generator);
 			std::experimental::native_simd<real> ST = S0_vec * std::experimental::exp(p1_vec + (p2_vec * Z));
 			std::experimental::native_simd<real> payoff = std::experimental::max(ST - K_vec, O_vec);
@@ -160,6 +157,8 @@ real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real
     return real_exp(-r * T) * (sum_payoffs / num_simulations);
 
 }
+
+#include <boost/version.hpp>
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -182,21 +181,27 @@ int main(int argc, char* argv[]) {
     boost::random_device rd;
     unsigned long long global_seed = rd();  // This will be the global seed
 
+    std::cout << "Using Boost "     
+          << BOOST_VERSION / 100000     << "."  // major version
+          << BOOST_VERSION / 100 % 1000 << "."  // minor version
+          << BOOST_VERSION % 100                // patch level
+          << std::endl;
+
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
     real sum = 0.0f;
     double t1=dml_micros();
     #pragma omp parallel for reduction(+:sum)
     for (ui64 run = 0; run < num_runs; ++run) {
-	// std::vector<real> random_numbers(num_simulations);
-	// #pragma omp parallel
-	// {
-    	//     XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-	//     std::normal_distribution<real> distribution(0.0, 1.0);
-    	//     #pragma omp for
-    	//     for (ui64 i = 0; i < num_simulations; ++i) {
-        // 	random_numbers[i] = distribution(generator);
-    	//     }
-	// }
+	/*std::vector<real> random_numbers(num_simulations);
+	#pragma omp parallel
+	{
+    	    XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
+	    boost::normal_distribution<real> distribution(0.0, 1.0);
+    	    #pragma omp for
+    	    for (ui64 i = 0; i < num_simulations * 2; ++i) {
+        	random_numbers[i] = distribution(generator);
+	    }
+	}*/
 	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
     }
 	
