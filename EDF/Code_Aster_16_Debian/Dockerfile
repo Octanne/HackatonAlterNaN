@@ -121,7 +121,7 @@ RUN \
 RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = -L${DEST}/metis-${METIS}/lib -lmetis # This line has been uncommented|' src/mumps.sh
 
 # We replace medium -mcmodel by large because medium not support in ARM gfortran
-#RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
+RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' src/miss3d.sh
 
 # Compile TFEL System
 #RUN sed -i '53i sed -i "11i set(CMAKE_CXX_FLAGS \\"\\${CMAKE_CXX_FLAGS} -fpermissive\\")" $(pwd)/../src/System/CMakeLists.txt' src/mfront.sh
@@ -130,23 +130,23 @@ RUN sed -i 's|#LMETIS     = -L\${DEST}/metis-\${METIS}/lib -lmetis|LMETIS     = 
 RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
-#RUN export DISTR=debian-12 ; \
-#   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
-#   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
-#   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
+RUN export DISTR=debian-12 ; \
+   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
+   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
+   make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
 
 # We source the prerequisites and compile
-#WORKDIR /root/dev/codeaster
-#RUN . /opt/aster/*/*/*_mpi.sh && \
-#    cd $HOME/dev/codeaster/src && \
-#    ./waf configure --prefix=/opt/aster/install/mpi && \
-#    ./waf install -j $(nproc)
+WORKDIR /root/dev/codeaster
+RUN . /opt/aster/*/*/*_mpi.sh && \
+    cd $HOME/dev/codeaster/src && \
+    ./waf configure --prefix=/opt/aster/install/mpi && \
+    ./waf install -j $(nproc)
 
 # Clean up
-#RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Check if installation pass Validation
-#WORKDIR /root
-#RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3 ; exit 0
+WORKDIR /root
+RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3 ; exit 0
 
 CMD ["/bin/bash"]
