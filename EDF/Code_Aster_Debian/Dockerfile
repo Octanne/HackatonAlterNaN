@@ -118,7 +118,7 @@ RUN sed -i '33i sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc' sr
 RUN sed -i '49i sed -i "s/ADD_DEFINITIONS(-Wsign-compare -Wconversion)/ADD_DEFINITIONS(-Wsign-compare -Wconversion -Wno-narrowing)/g" "$(pwd)/../src/INTERP_KERNEL/CMakeLists.txt"' src/medcoupling.sh
 
 # Start compilation
-#RUN export DISTR=debian-11 ; \
+RUN export DISTR=debian-12 ; \
 RUN make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
     make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv ; \
     make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0
@@ -126,10 +126,9 @@ RUN make ROOT=/opt/aster ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check ; \
 # We source the prerequisites and compile
 WORKDIR /root/dev/codeaster
 RUN . /opt/aster/*/*/*_mpi.sh && \
-	cd $HOME/dev/codeaster/src && \
-	./configure --prefix=/opt/aster/install/mpi && \
-	cd $HOME/dev/codeaster/src && \
-	make
+    cd $HOME/dev/codeaster/src && \
+    ./waf configure --prefix=/opt/aster/install/mpi && \
+    ./waf install -j $(nproc)
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
