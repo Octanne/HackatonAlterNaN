@@ -8,6 +8,7 @@
 
 # Load necessary modules (if needed, e.g., armclang)
 module load armpl/24.10.1
+module load gnu/14.2.0
 
 # Compilation command
 g++ -fopenmp -O3 -DREAL=float -ffast-math -funroll-loops -fcaller-saves -march=native -std=c++17 -o BSM BSM.cxx

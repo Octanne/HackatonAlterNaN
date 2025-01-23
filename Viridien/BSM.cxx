@@ -66,6 +66,7 @@ You need to tune and parallelize the code to run for large # of simulations
 #include <iomanip>   // For setting precision
 #include "XoshiroCpp.hpp"
 #include <omp.h>
+#include <time.h>
 #include <boost/random.hpp>
 #include <boost/nondet_random.hpp>
 #include <experimental/simd>
@@ -73,7 +74,7 @@ You need to tune and parallelize the code to run for large # of simulations
 #define ui64 u_int64_t
 
 #ifndef REAL
-#define REAL double
+#define REAL long double
 #endif
 
 #ifndef INSTRUCTION
@@ -85,7 +86,7 @@ using real = REAL;
 #define SIMD_WIDTH sizeof(std::experimental::native_simd<real>) / sizeof(real)
 
 inline real real_sqrt(real x) {
-	if constexpr(std::is_same_v<real, double>) {
+	if constexpr(std::is_same_v<real, long double>) {
 		return sqrt(x);
 	} else if constexpr(std::is_same_v<real, float>) {
 		return sqrtf(x);
@@ -93,14 +94,27 @@ inline real real_sqrt(real x) {
 }
 
 inline real real_exp(real x) {
-	if constexpr(std::is_same_v<real, double>) {
+	if constexpr(std::is_same_v<real, long double>) {
 		return exp(x);
 	} else if constexpr(std::is_same_v<real, float>) {
 		return expf(x);
 	}
 }
 
+// constexpr size_t NUM_RANDOM_NUMBERS = 1000000;
+constexpr size_t NUM_RANDOM_NUMBERS = 1000000000;
 
+std::vector<real> generate_random_numbers(unsigned int initial_seed, ui64 num_simulations) {
+    std::vector<real> numbers(num_simulations * SIMD_WIDTH);
+    XoshiroCpp::Xoshiro256PlusPlus generator(initial_seed);
+    std::normal_distribution<real> distribution(0.0, 1.0);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < num_simulations * SIMD_WIDTH; ++i) {
+        numbers[i] = distribution(generator);
+    }
+    return numbers;
+}
 
 #include <sys/time.h>
 double
@@ -123,39 +137,60 @@ real gaussian_box_muller() {
 
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
 real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real q, ui64 num_simulations) {
-    real sum_payoffs = 0.0;
+    real sum_payoffs = real(0.0);
 
-#pragma omp parallel
+	#pragma omp parallel
 	{
-//I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
-//with the generator private to each threadi
-	XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-	boost::normal_distribution<real> distribution(0.0, 1.0);
-//On calcule les parties qui changent pas une seule fois
-	//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
-	real p1 =	(r - q - real(0.5f) * sigma * sigma) * T;
-	real p2 = sigma * real_sqrt(T);
-	
-	std::experimental::native_simd<real> p1_vec = p1;
-	std::experimental::native_simd<real> p2_vec = p2;
-	
-	std::experimental::native_simd<real> S0_vec = S0;
-	std::experimental::native_simd<real> K_vec = K;
-	std::experimental::native_simd<real> O_vec = 0.0f;
+		//I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
+		//with the generator private to each thread
+		XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
+		boost::random::normal_distribution<real> distribution(0.0, 1.0);
+		//On calcule les parties qui changent pas une seule fois
+		//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
+		const real log_2 = real(1.44269504089);
+		real p1 =	(r - q - real(0.5) * sigma * sigma) * T;
+		real p2 = sigma * real_sqrt(T);
+		
+		std::experimental::native_simd<real> p1_vec = p1;
+		std::experimental::native_simd<real> p2_vec = p2;
+		
+		std::experimental::native_simd<real> S0_vec = S0;
+		std::experimental::native_simd<real> K_vec = K;
+		std::experimental::native_simd<real> O_vec = real(0.0);
 
-#pragma omp for reduction(+:sum_payoffs)
+		#pragma omp for reduction(+:sum_payoffs)
 		for (ui64 i = 0; i < num_simulations; i += SIMD_WIDTH) {
+			// Pick a random offset within the bounds of the random_numbers vector
+			// ui64 offset = std::min(i, num_simulations - SIMD_WIDTH);
+			// std::experimental::native_simd<real> Z;
+			// for (int j = 0; j < SIMD_WIDTH; ++j) {
+			// 	Z[j] = random_numbers[offset + j];
+			// }
+
 			std::experimental::native_simd<real> Z;
-			for (int j = 0; j < SIMD_WIDTH; ++j)
+			for (int j = 0; j < SIMD_WIDTH; ++j) {
 				Z[j] = distribution(generator);
-//			real Z = distribution(generator);
-			std::experimental::native_simd<real> ST = S0_vec * std::experimental::exp(p1_vec + (p2_vec * Z));
+			}
+
+			// ui64 offset = i * SIMD_WIDTH;
+            // std::experimental::native_simd<real> Z;
+            // for (int j = 0; j < SIMD_WIDTH; ++j) {
+            //     Z[j] = random_numbers[offset + j];
+            // }
+
+			// std::experimental::native_simd<real> Z;
+			// for (int j = 0; j < SIMD_WIDTH; ++j) {
+			// 	Z[j] = RANDOM_NUMBERS[i + j];
+			// }
+
+			// std::experimental::native_simd<real> ST = S0_vec * std::experimental::exp(p1_vec + (p2_vec * Z));
+			std::experimental::native_simd<real> ST = S0_vec * std::experimental::pow(2, (p1_vec + (p2_vec * Z)) * log_2);
 			std::experimental::native_simd<real> payoff = std::experimental::max(ST - K_vec, O_vec);
 			sum_payoffs += std::experimental::reduce(payoff);
 		}
-};
-    return real_exp(-r * T) * (sum_payoffs / num_simulations);
+	}
 
+    return real_exp(-r * T) * (sum_payoffs / num_simulations);
 }
 
 #include <boost/version.hpp>
@@ -188,21 +223,22 @@ int main(int argc, char* argv[]) {
           << std::endl;
 
     std::cout << "Global initial seed: " << global_seed << "      argv[1]= " << argv[1] << "     argv[2]= " << argv[2] <<  std::endl;
-    real sum = 0.0f;
+    real sum = 0.0;
     double t1=dml_micros();
+
+	// std::vector<real> random_numbers(constexpr_steps);
+	// XoshiroCpp::Xoshiro256PlusPlus generator(global_seed);
+	// boost::normal_distribution<real> distribution(0.0, 1.0);
+	// for (ui64 i = 0; i < constexpr_steps; ++i) {
+	// 	random_numbers[i] = distribution(generator);
+	// }
+
     #pragma omp parallel for reduction(+:sum)
     for (ui64 run = 0; run < num_runs; ++run) {
-	/*std::vector<real> random_numbers(num_simulations);
-	#pragma omp parallel
-	{
-    	    XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-	    boost::normal_distribution<real> distribution(0.0, 1.0);
-    	    #pragma omp for
-    	    for (ui64 i = 0; i < num_simulations * 2; ++i) {
-        	random_numbers[i] = distribution(generator);
-	    }
-	}*/
-	sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
+		// boost::random_device rd2;
+		// unsigned long long seed = rd2();
+		// std::vector<real> random_numbers = generate_random_numbers(seed, num_simulations);
+		sum += black_scholes_monte_carlo(S0, K, T, r, sigma, q, num_simulations);
     }
 	
     double t2=dml_micros();
