@@ -1,0 +1,948 @@
+
+# ------------------------------------------------------------------------------
+Execution of code_aster
+
+# ------------------------------------------------------------------------------
+Prepare environment in /tmp/run_aster_ewmkntq3/proc.0
+
+# ------------------------------------------------------------------------------
+Command file #1 / 1
+
+Content of the file to execute:
+# coding=utf-8
+#!/usr/bin/python
+
+import os
+from statistics import mean
+from datetime import datetime
+from resource import RUSAGE_SELF, getrusage
+
+from code_aster.Commands import *
+from code_aster import CA
+from code_aster.Utilities import petscInitialize
+
+CA.init()
+
+params = {}
+params["refinements"] = int(os.environ.get("REFINE", 1))
+params["parallel"] = os.environ.get("USE_LEGACY", "HPC")
+params["solver"] = os.environ.get("SOLVER", "PETSC")
+
+# General parameters
+comm = CA.MPI.ASTER_COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
+nbHexa = 8 ** params["refinements"]
+
+
+def memory_peak(mess=None):
+    """Return memory peak in MB"""
+    return int(getrusage(RUSAGE_SELF).ru_maxrss / 1024)
+
+
+class ChronoCtxMgGen:
+    stats = {}
+
+    def __init__(self, what):
+        self._what = what
+
+    def __enter__(self):
+        self.start = datetime.now()
+
+    def __exit__(self, exctype, exc, tb):
+        self.stop = datetime.now()
+        delta = self.stop - self.start
+        mem = memory_peak(self._what)
+        self.stats[self._what] = [delta.total_seconds(), mem]
+
+
+class ChronoCtxMg(ChronoCtxMgGen):
+    pass
+    # def __init__(self, what):
+    #     ChronoCtxMgGen.__init__(self, what)
+
+
+def write_stats(nume_ddl):
+    if rank == 0:
+        print("TITLE: TEST PERF CUBE")
+        print()
+        print("NB PROC")
+        print(size)
+        print()
+        print(
+            "COMMAND, TIME MIN (s), TIME MAX (s), TIME MEAN (s), MEM MIN (Mo), MEM MAX (Mo), MEM MEAN (Mo)"
+        )
+
+    for key, values in stats.items():
+        time = comm.gather(values[0], root=0)
+        mem = comm.gather(values[1], root=0)
+        if rank == 0:
+            print(
+                key
+                + ", "
+                + str(min(time))
+                + ", "
+                + str(max(time))
+                + ", "
+                + str(mean(time))
+                + ", "
+                + str(min(mem))
+                + ", "
+                + str(max(mem))
+                + ", "
+                + str(mean(mem))
+            )
+
+    mesh = nume_ddl.getMesh()
+    nodes = len(mesh.getInnerNodes())
+    nodes = comm.allreduce(nodes, CA.MPI.SUM)
+
+    if rank == 0:
+        print()
+        print("NB CELLS, NB NODES, NB DOFS")
+        print(str(nbHexa) + ", " + str(nodes) + ", " + str(nume_ddl.getNumberOfDofs()))
+
+
+def print_markdown_table(data, refine, nbcells, nbnodes, nbdofs):
+    """Print a table of the mean time as a Markdown table."""
+
+    def show(*args, **kwargs):
+        if rank == 0:
+            print(*args, **kwargs)
+
+    fmti = "| {0:<16s} | {1:11,d} |"
+    fmtt = "| {0:<16s} | {1:11.2f} |"
+    separ = "| :--------------- | ----------: |"
+    show(fmti.format("Refinement", refine))
+    show(separ)
+    show(fmti.format("Number of cells", nbcells).replace(",", " "))
+    show(fmti.format("Number of nodes", nbnodes).replace(",", " "))
+    show(fmti.format("Number of DOFs", nbdofs).replace(",", " "))
+    show(fmti.format("Number of procs", size).replace(",", " "))
+    show(fmti.format("Nb of DOFs/proc", nbdofs // size).replace(",", " "))
+    for key, values in data.items():
+        times = comm.gather(values[0], root=0)
+        # mem = comm.gather(values[1], root=0)
+        if rank == 0:
+            show(fmtt.format(key, mean(times)))
+
+
+# petscInitialize('-ksp_monitor_true_residual -stats' )
+petscInitialize("-ksp_monitor_true_residual -log_view")
+
+with ChronoCtxMg("Total"):
+    with ChronoCtxMg("Build mesh"):
+        if params["parallel"] == "HPC":
+            mesh = CA.ParallelMesh.buildCube(refine=params["refinements"])
+        else:
+            mesh = CA.Mesh.buildCube(refine=params["refinements"])
+
+    with ChronoCtxMg("Model"):
+        model = AFFE_MODELE(
+            MAILLAGE=mesh,
+            AFFE=_F(
+                TOUT="OUI",
+                PHENOMENE="MECANIQUE",
+                MODELISATION="3D",
+            ),
+        )
+
+    with ChronoCtxMg("Material"):
+        steel = DEFI_MATERIAU(
+            ELAS=_F(
+                E=200000.0,
+                NU=0.3,
+            ),
+            ECRO_LINE=_F(
+                D_SIGM_EPSI=2000.0,
+                SY=200.0,
+            ),
+        )
+
+        mater = AFFE_MATERIAU(
+            MAILLAGE=mesh,
+            AFFE=_F(
+                TOUT="OUI",
+                MATER=steel,
+            ),
+        )
+
+    with ChronoCtxMg("Boundary conditions"):
+        block = AFFE_CHAR_CINE(
+            MODELE=model,
+            MECA_IMPO=(
+                _F(
+                    GROUP_MA="LEFT",
+                    DX=0,
+                    DY=0.0,
+                    DZ=0.0,
+                ),
+            ),
+        )
+
+        imposed_displ = AFFE_CHAR_CINE(
+            MODELE=model,
+            MECA_IMPO=(
+                _F(
+                    GROUP_MA="RIGHT",
+                    DY=0.001,
+                    DZ=0.001,
+                ),
+            ),
+        )
+
+    with ChronoCtxMg("Create matrix"):
+        stiff_elem = CALC_MATR_ELEM(
+            MODELE=model,
+            OPTION="RIGI_MECA",
+            CHAM_MATER=mater,
+        )
+
+    with ChronoCtxMg("Numbering"):
+        dofNum = NUME_DDL(
+            MATR_RIGI=stiff_elem,
+        )
+
+    with ChronoCtxMg("Assembly"):
+        stiffness = ASSE_MATRICE(
+            MATR_ELEM=stiff_elem,
+            NUME_DDL=dofNum,
+            CHAR_CINE=(block, imposed_displ),
+        )
+
+    with ChronoCtxMg("Build RHS"):
+        rhs = CREA_CHAMP(
+            TYPE_CHAM="NOEU_DEPL_R",
+            OPERATION="AFFE",
+            MAILLAGE=mesh,
+            AFFE=_F(
+                TOUT="OUI",
+                NOM_CMP=(
+                    "DX",
+                    "DY",
+                    "DZ",
+                ),
+                VALE=(
+                    0.0,
+                    0.0,
+                    0.0,
+                ),
+            ),
+        )
+
+        load_vector = CALC_CHAR_CINE(NUME_DDL=dofNum, CHAR_CINE=(block, imposed_displ))
+
+    if params["solver"] == "PETSC":
+        solver = CA.PetscSolver(RENUM="SANS", PRE_COND="GAMG")
+    elif params["solver"] == "MUMPS":
+        solver = CA.MumpsSolver(
+            MATR_DISTRIBUEE="OUI",
+            RENUM="PARMETIS",
+            ACCELERATION="FR+",
+            POSTTRAITEMENTS="MINI",
+        )
+
+    with ChronoCtxMg("Factorize"):
+        solver.factorize(stiffness)
+
+    with ChronoCtxMg("Solve"):
+        resu = solver.solve(rhs, load_vector)
+
+# write_stats(dofNum)
+nbNodes = len(mesh.getInnerNodes())
+if params["parallel"] == "HPC":
+    nbNodes = comm.allreduce(nbNodes, CA.MPI.SUM)
+nbDOFs = dofNum.getNumberOfDOFs()
+print_markdown_table(ChronoCtxMg.stats, params["refinements"], nbHexa, nbNodes, nbDOFs)
+
+CA.close()
+
+
+
+# ------------------------------------------------------------------------------
+Command line #1:
+    ulimit -c unlimited ; ulimit -t 108000 ; ( /opt/venv/bin/python3 -m mpi4py /home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/Cube_perf.py --last --tpmax 86400 ; echo $? > _exit_code_ ) 2>&1 | tee -a fort.6
+setting '--memory' value to 3686.40 MB (keyword RESERVE_MEMOIRE)
+checking MPI initialization...
+using COMM_WORLD.
+MPI is initialized.
+Ouverture en écriture du fichier ./vola.1
+
+<INFO> Démarrage de l'exécution.
+
+                       -- CODE_ASTER -- VERSION : DÉVELOPPEMENT (unstable) --                       
+                               Version 17.2.4 modifiée le 20/01/2025                                
+                               révision f855b56619c7 - branche 'main'                               
+                                   Copyright EDF R&D 1991 - 2025                                    
+                                                                                                    
+                              Exécution du : Thu Jan 23 16:12:42 2025                               
+                                  Nom de la machine : 8b87b9d0b29a                                  
+                                        Architecture : 64bit                                        
+                                    Type de processeur : aarch64                                    
+        Système d'exploitation : Linux-5.10.226-214.880.amzn2.aarch64-aarch64-with-glibc2.40        
+                                  Langue des messages : en (UTF-8)                                  
+                                     Version de Python : 3.11.2                                     
+                                     Version de NumPy : 1.24.2                                      
+                                      Parallélisme MPI : actif                                      
+                                   Rang du processeur courant : 0                                   
+                               Nombre de processeurs MPI utilisés : 1                               
+                                    Parallélisme OpenMP : actif                                     
+                              Nombre de processus OpenMP utilisés : 1                               
+                               Version de la librairie HDF5 : 1.10.9                                
+                                Version de la librairie MED : 4.1.1                                 
+                               Version de la librairie MFront : 4.2.0                               
+                               Version de la librairie MUMPS : 5.6.2                                
+                              Version de la librairie PETSc : 3.20.5p0                              
+                               Version de la librairie SCOTCH : 7.0.4                               
+
+starting the execution...
+Valeur initiale du temps CPU maximum =   86400 secondes
+  Valeur du temps CPU maximum passé aux commandes =   77760 secondes
+  Réserve CPU prévue = 8640 secondes
+
+Ouverture en écriture du fichier ./glob.1
+
+Ouverture en écriture du fichier ./vola.1
+
+Ouverture en lecture du fichier /opt/aster/install/mpi/lib/aster/elem.1
+
+Nom de la base                          :  ELEMBASE
+     Créée avec la version                   :  17.02.04
+     Nombre d'enregistrements utilisés       :  45
+     Nombre d'enregistrements maximum        :  512
+     Nombre d'enregistrements par fichier    :  512
+     Longueur d'enregistrement (octets)      :  819200
+     Nombre d'identificateurs utilisés       :  123
+     Taille maximum du répertoire            :  300
+     Pourcentage d'utilisation du répertoire :  41 %
+
+Ouverture en lecture du fichier /opt/aster/install/mpi/lib/aster/elem.1
+
+Nom de la base                          :  ELEMBASE
+     Nombre d'enregistrements utilisés       :  45
+     Nombre d'enregistrements maximum        :  512
+     Nombre d'enregistrements par fichier    :  512
+     Longueur d'enregistrement (octets)      :  819200
+     Nombre total d'accès en lecture         :  63
+     Volume des accès en lecture             :         49.22 Mo.
+     Nombre total d'accès en écriture        :  0
+     Volume des accès en écriture            :          0.00 Mo.
+     Nombre d'identificateurs utilisés       :  123
+     Taille maximum du répertoire            :  300
+     Pourcentage d'utilisation du répertoire :  41 %
+
+Relecture des catalogues des éléments faite.
+
+Fin de lecture (durée  0.014083  s.) 
+
+                      Mémoire limite pour l'allocation dynamique : 4198.49 Mo                       
+                         ajouté à l'initialisation du processus : 618.47 Mo                         
+                               Limite cible du processus : 4816.96 Mo                               
+                         Taille limite des fichiers d'échange : 2048.00 Go                          
+# Mémoire (Mo) :   618.47 /   609.60 /   209.22 /   185.03 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0001   user+syst:        0.02s (syst:        0.07s, elaps:        0.10s)
+# ----------------------------------------------------------------------------------------------
+PETSc initialized...
+Nom MED du maillage : PARALLEPIPED
+
+
+------------ MAILLAGE 00000001 - IMPRESSIONS NIVEAU  1 ------------
+
+
+NOMBRE DE NOEUDS                       35937
+
+NOMBRE DE MAILLES                      39296
+                              SEG2                  384
+                              QUAD4                6144
+                              HEXA8               32768
+
+NOMBRE DE GROUPES DE NOEUDS                8
+
+NOMBRE DE GROUPES DE MAILLES              19
+
+--------------------------------------------------------------------------------
+
+
+.. _stg1_txt190
+# ----------------------------------------------------------------------------------------------
+# Commande #0002 de /opt/aster/install/mpi/lib/aster/code_aster/Helpers/LogicalUnit.py, ligne 190
+DEFI_FICHIER(ACCES='NEW',
+             ACTION='ASSOCIER',
+             FICHIER='/tmp/buildCubefga8xgnp/buildCube.med',
+             TYPE='BINARY',
+             UNITE=99)
+
+Deleting '/tmp/buildCubefga8xgnp/buildCube.med': No such file or directory
+# Mémoire (Mo) :   696.69 /   658.95 /   209.22 /   185.03 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0002   user+syst:        0.00s (syst:        0.00s, elaps:        0.00s)
+# ----------------------------------------------------------------------------------------------
+Création du fichier au format MED 3.3.1.
+
+
+.. _stg1_txt190
+# ----------------------------------------------------------------------------------------------
+# Commande #0003 de /opt/aster/install/mpi/lib/aster/code_aster/Helpers/LogicalUnit.py, ligne 190
+DEFI_FICHIER(ACTION='LIBERER',
+             UNITE=99)
+
+# Mémoire (Mo) :   696.69 /   659.07 /   211.33 /   185.03 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0003   user+syst:        0.00s (syst:        0.00s, elaps:        0.00s)
+# ----------------------------------------------------------------------------------------------
+<INFO> Activation du mode parallélisme distribué.
+
+Nom MED du maillage : 00000001
+
+
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+
+.. _stg1_txt282
+# ----------------------------------------------------------------------------------------------
+# Commande #0004 de /opt/aster/install/mpi/lib/aster/code_aster/ObjectsExt/parallelmesh_ext.py,
+ligne 282
+CREA_MAILLAGE(INFO=1,
+              MAILLAGE='<00000002>',
+              RAFFINEMENT=_F(NIVEAU=0,
+                             TOUT='OUI'))
+
+
+------------ MAILLAGE 00000004 - IMPRESSIONS NIVEAU  1 ------------
+
+ASTER 17.02.04 CONCEPT 00000004 CALCULE LE 23/01/2025 A 16:12:44 DE TYPE        
+MAILLAGE_P                                                                      
+
+NOMBRE DE NOEUDS                       35937
+
+NOMBRE DE MAILLES                      39296
+                              SEG2                  384
+                              QUAD4                6144
+                              HEXA8               32768
+
+NOMBRE DE GROUPES DE NOEUDS                8
+
+NOMBRE DE GROUPES DE MAILLES              19
+
+--------------------------------------------------------------------------------
+
+#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      0.00      0.00      0.00
+# Résultat commande #0004 (CREA_MAILLAGE): '<00000004>' de type <ParallelMesh>
+# Mémoire (Mo) :   903.91 /   714.92 /   222.48 /   189.94 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0004   user+syst:        0.36s (syst:        0.04s, elaps:        0.40s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt131
+# ----------------------------------------------------------------------------------------------
+# Commande #0005 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 131
+model = AFFE_MODELE(AFFE=_F(MODELISATION='3D',
+                            PHENOMENE='MECANIQUE',
+                            TOUT='OUI'),
+                    DISTRIBUTION=_F(METHODE='CENTRALISE'),
+                    INFO=1,
+                    MAILLAGE='<00000004>',
+                    VERI_JACOBIEN='OUI',
+                    VERI_NORM_IFS='OUI',
+                    VERI_PLAN='OUI')
+
+Sur les 39296 mailles du maillage 00000004, on a demandé l'affectation de 39296, on a pu en affecter
+39296.
+Modélisation     Formulation      Type maille  Élément fini     Nombre
+_                _                SEG2         MECA_ARETE2      384
+_                _                QUAD4        MECA_FACE4       6144
+3D               _                HEXA8        MECA_HEXA8       32768
+#2      Calculs elementaires et assemblages               CPU (USER+SYST/SYST/ELAPS):      0.02      0.00      0.02
+#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      0.00      0.00      0.00
+# Résultat commande #0005 (AFFE_MODELE): model ('<00000005>') de type <Model>
+# Mémoire (Mo) :   903.91 /   738.47 /   222.48 /   204.72 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0005   user+syst:        0.13s (syst:        0.00s, elaps:        0.13s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt141
+# ----------------------------------------------------------------------------------------------
+# Commande #0006 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 141
+steel = DEFI_MATERIAU(ECRO_LINE=_F(D_SIGM_EPSI=2000.0,
+                                   SY=200.0),
+                      ELAS=_F(B_ENDOGE=0.0,
+                              COEF_AMOR=1.0,
+                              E=200000.0,
+                              K_DESSIC=0.0,
+                              NU=0.3),
+                      INFO=1)
+
+# Résultat commande #0006 (DEFI_MATERIAU): steel ('<00000006>') de type <Material>
+# Mémoire (Mo) :   903.91 /   738.47 /   222.48 /   204.72 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0006   user+syst:        0.01s (syst:        0.00s, elaps:        0.02s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt152
+# ----------------------------------------------------------------------------------------------
+# Commande #0007 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 152
+mater = AFFE_MATERIAU(AFFE=_F(MATER=steel,
+                              TOUT='OUI'),
+                      INFO=1,
+                      MAILLAGE='<00000004>')
+
+# Résultat commande #0007 (AFFE_MATERIAU): mater ('<00000007>') de type <MaterialField>
+# Mémoire (Mo) :   903.91 /   738.47 /   222.48 /   204.72 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0007   user+syst:        0.01s (syst:        0.00s, elaps:        0.01s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt161
+# ----------------------------------------------------------------------------------------------
+# Commande #0008 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 161
+block = AFFE_CHAR_CINE(INFO=1,
+                       MECA_IMPO=_F(DX=0,
+                                    DY=0.0,
+                                    DZ=0.0,
+                                    GROUP_MA='LEFT'),
+                       MODELE=model,
+                       SYNTAXE='NON')
+
+# Résultat commande #0008 (AFFE_CHAR_CINE): block ('<00000008>') de type <MechanicalDirichletBC>
+# Mémoire (Mo) :   903.91 /   738.47 /   222.48 /   204.72 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0008   user+syst:        0.02s (syst:        0.00s, elaps:        0.02s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt173
+# ----------------------------------------------------------------------------------------------
+# Commande #0009 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 173
+imposed_displ = AFFE_CHAR_CINE(INFO=1,
+                               MECA_IMPO=_F(DY=0.001,
+                                            DZ=0.001,
+                                            GROUP_MA='RIGHT'),
+                               MODELE=model,
+                               SYNTAXE='NON')
+
+# Résultat commande #0009 (AFFE_CHAR_CINE): imposed_displ ('<00000009>') de type
+<MechanicalDirichletBC>
+# Mémoire (Mo) :   903.91 /   738.47 /   222.48 /   204.72 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0009   user+syst:        0.02s (syst:        0.00s, elaps:        0.02s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt185
+# ----------------------------------------------------------------------------------------------
+# Commande #0010 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 185
+stiff_elem = CALC_MATR_ELEM(CALC_ELEM_MODELE='OUI',
+                            CHAM_MATER=mater,
+                            INST=0.0,
+                            MODELE=model,
+                            MODE_FOURIER=0,
+                            OPTION='RIGI_MECA')
+
+# Résultat commande #0010 (CALC_MATR_ELEM): stiff_elem ('<0000000b>') de type
+<ElementaryMatrixDisplacementReal>
+# Mémoire (Mo) :   903.91 /   786.21 /   288.47 /   206.99 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0010   user+syst:        0.32s (syst:        0.00s, elaps:        0.32s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt192
+# ----------------------------------------------------------------------------------------------
+# Commande #0011 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 192
+dofNum = NUME_DDL(INFO=1,
+                  MATR_RIGI=stiff_elem)
+
+Le système linéaire à résoudre a 107811 degrés de liberté:
+   - 107811 sont des degrés de liberté physiques
+     (ils sont portés par 35937 noeuds du maillage)
+   - 0 sont les couples de paramètres de Lagrange associés
+     aux 0 relations linéaires dualisées.
+La matrice est de taille 107811 équations.
+  Elle contient 4160934 termes non nuls si elle est symétrique et 8214057 termes non nuls si elle
+n'est pas symétrique.
+  Soit un taux de remplissage de   0.071 %.
+# Résultat commande #0011 (NUME_DDL): dofNum ('<00000011>') de type <ParallelDOFNumbering>
+# Mémoire (Mo) :   903.91 /   802.91 /   396.60 /   283.10 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0011   user+syst:        0.19s (syst:        0.07s, elaps:        0.26s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt197
+# ----------------------------------------------------------------------------------------------
+# Commande #0012 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 197
+stiffness = ASSE_MATRICE(CHAR_CINE=(block, imposed_displ),
+                         INFO=1,
+                         MATR_ELEM=stiff_elem,
+                         NUME_DDL=dofNum)
+
+# Résultat commande #0012 (ASSE_MATRICE): stiffness ('<00000013>') de type
+<AssemblyMatrixDisplacementReal>
+# Mémoire (Mo) :   903.91 /   835.48 /   396.60 /   283.10 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0012   user+syst:        0.12s (syst:        0.01s, elaps:        0.13s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt204
+# ----------------------------------------------------------------------------------------------
+# Commande #0013 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 204
+rhs = CREA_CHAMP(AFFE=_F(NOM_CMP=('DX', 'DY', 'DZ'),
+                         TOUT='OUI',
+                         VALE=(0.0, 0.0, 0.0)),
+                 INFO=1,
+                 MAILLAGE='<00000004>',
+                 OPERATION='AFFE',
+                 TYPE_CHAM='NOEU_DEPL_R')
+
+#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      0.00      0.00      0.00
+# Résultat commande #0013 (CREA_CHAMP): rhs ('<00000015>') de type <FieldOnNodesReal>
+# Mémoire (Mo) :   903.91 /   842.07 /   396.60 /   283.10 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0013   user+syst:        0.01s (syst:        0.00s, elaps:        0.01s)
+# ----------------------------------------------------------------------------------------------
+
+.. _stg1_txt223
+# ----------------------------------------------------------------------------------------------
+# Commande #0014 de
+/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+Cube_perf.py, ligne 223
+load_vector = CALC_CHAR_CINE(CHAR_CINE=(block, imposed_displ),
+                             INFO=1,
+                             INST=0.0,
+                             NUME_DDL=dofNum)
+
+# Résultat commande #0014 (CALC_CHAR_CINE): load_vector ('<00000017>') de type <FieldOnNodesReal>
+# Mémoire (Mo) :   903.91 /   842.89 /   396.60 /   283.10 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0014   user+syst:        0.01s (syst:        0.00s, elaps:        0.02s)
+# ----------------------------------------------------------------------------------------------
+  0 KSP unpreconditioned resid norm 2.769057087665e+02 true resid norm 2.769057087665e+02 ||r(i)||/||b|| 1.000000000000e+00
+  1 KSP unpreconditioned resid norm 3.932019274438e+01 true resid norm 3.932019274438e+01 ||r(i)||/||b|| 1.419984908204e-01
+  2 KSP unpreconditioned resid norm 5.529941720653e+00 true resid norm 5.529941720653e+00 ||r(i)||/||b|| 1.997048650708e-02
+  3 KSP unpreconditioned resid norm 1.648875037452e+00 true resid norm 1.648875037452e+00 ||r(i)||/||b|| 5.954644434012e-03
+  4 KSP unpreconditioned resid norm 5.333248971222e-01 true resid norm 5.333248971222e-01 ||r(i)||/||b|| 1.926016258379e-03
+  5 KSP unpreconditioned resid norm 1.860592110091e-01 true resid norm 1.860592110091e-01 ||r(i)||/||b|| 6.719226260734e-04
+  6 KSP unpreconditioned resid norm 6.131397842353e-02 true resid norm 6.131397842354e-02 ||r(i)||/||b|| 2.214254761907e-04
+  7 KSP unpreconditioned resid norm 2.253303597657e-02 true resid norm 2.253303597654e-02 ||r(i)||/||b|| 8.137440024954e-05
+  8 KSP unpreconditioned resid norm 8.302164587995e-03 true resid norm 8.302164587998e-03 ||r(i)||/||b|| 2.998191920630e-05
+  9 KSP unpreconditioned resid norm 2.917806769314e-03 true resid norm 2.917806769319e-03 ||r(i)||/||b|| 1.053718531957e-05
+ 10 KSP unpreconditioned resid norm 9.895004890383e-04 true resid norm 9.895004890307e-04 ||r(i)||/||b|| 3.573420329392e-06
+ 11 KSP unpreconditioned resid norm 3.250514271510e-04 true resid norm 3.250514271340e-04 ||r(i)||/||b|| 1.173870443416e-06
+ 12 KSP unpreconditioned resid norm 1.139193873224e-04 true resid norm 1.139193873276e-04 ||r(i)||/||b|| 4.114013677620e-07
+| Refinement       |           5 |
+| :--------------- | ----------: |
+| Number of cells  |      32 768 |
+| Number of nodes  |      35 937 |
+| Number of DOFs   |     107 811 |
+| Number of procs  |           1 |
+| Nb of DOFs/proc  |     107 811 |
+| Build mesh       |        2.08 |
+| Model            |        0.13 |
+| Material         |        0.03 |
+| Boundary conditions |        0.04 |
+| Create matrix    |        0.32 |
+| Numbering        |        0.26 |
+| Assembly         |        0.13 |
+| Build RHS        |        0.02 |
+| Factorize        |        1.77 |
+| Solve            |        0.36 |
+| Total            |        5.15 |
+
+.. _stg1_txt72
+# ----------------------------------------------------------------------------------------------
+# Commande #0015 de /opt/aster/install/mpi/lib/aster/code_aster/CodeCommands/fin.py, ligne 72
+FIN(INFO_RESU='NON',
+    RETASSAGE='NON')
+
+No database in results, objects not saved on processor #0
+****************************************************************************************************************************************************************
+***                                WIDEN YOUR WINDOW TO 160 CHARACTERS.  Use 'enscript -r -fCourier9' to print this document                                 ***
+****************************************************************************************************************************************************************
+
+------------------------------------------------------------------ PETSc Performance Summary: ------------------------------------------------------------------
+
+petsc_aster on a  named 8b87b9d0b29a with 1 processor, by Unknown Thu Jan 23 16:12:47 2025
+Using 1 OpenMP threads
+Using Petsc Release Version 3.20.5, unknown 
+
+                         Max       Max/Min     Avg       Total
+Time (sec):           5.170e+00     1.000   5.170e+00
+Objects:              0.000e+00     0.000   0.000e+00
+Flops:                2.647e+09     1.000   2.647e+09  2.647e+09
+Flops/sec:            5.120e+08     1.000   5.120e+08  5.120e+08
+MPI Msg Count:        0.000e+00     0.000   0.000e+00  0.000e+00
+MPI Msg Len (bytes):  0.000e+00     0.000   0.000e+00  0.000e+00
+MPI Reductions:       0.000e+00     0.000
+
+Flop counting convention: 1 flop = 1 real number operation of type (multiply/divide/add/subtract)
+                            e.g., VecAXPY() for real vectors of length N --> 2N flops
+                            and VecAXPY() for complex vectors of length N --> 8N flops
+
+Summary of Stages:   ----- Time ------  ----- Flop ------  --- Messages ---  -- Message Lengths --  -- Reductions --
+                        Avg     %Total     Avg     %Total    Count   %Total     Avg         %Total    Count   %Total
+ 0:      Main Stage: 5.1700e+00 100.0%  2.6472e+09 100.0%  0.000e+00   0.0%  0.000e+00        0.0%  0.000e+00   0.0%
+
+------------------------------------------------------------------------------------------------------------------------
+See the 'Profiling' chapter of the users' manual for details on interpreting output.
+Phase summary info:
+   Count: number of times phase was executed
+   Time and Flop: Max - maximum over all processors
+                  Ratio - ratio of maximum to minimum over all processors
+   Mess: number of messages sent
+   AvgLen: average message length (bytes)
+   Reduct: number of global reductions
+   Global: entire computation
+   Stage: stages of a computation. Set stages with PetscLogStagePush() and PetscLogStagePop().
+      %T - percent time in this phase         %F - percent flop in this phase
+      %M - percent messages in this phase     %L - percent message lengths in this phase
+      %R - percent reductions in this phase
+   Total Mflop/s: 10e-6 * (sum of flop over all processors)/(max time over all processors)
+------------------------------------------------------------------------------------------------------------------------
+Event                Count      Time (sec)     Flop                              --- Global ---  --- Stage ----  Total
+                   Max Ratio  Max     Ratio   Max  Ratio  Mess   AvgLen  Reduct  %T %F %M %L %R  %T %F %M %L %R Mflop/s
+------------------------------------------------------------------------------------------------------------------------
+
+--- Event Stage 0: Main Stage
+
+BuildTwoSided         75 1.0 5.0430e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+BuildTwoSidedF        36 1.0 7.0198e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatMult              200 1.0 3.2446e-01 1.0 1.47e+09 1.0 0.0e+00 0.0e+00 0.0e+00  6 56  0  0  0   6 56  0  0  0  4544
+MatMultAdd            36 1.0 1.3114e-02 1.0 6.34e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  2  0  0  0   0  2  0  0  0  4833
+MatMultTranspose      36 1.0 2.2967e-02 1.0 6.34e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  2  0  0  0   0  2  0  0  0  2759
+MatSolve              12 1.0 2.2188e-05 1.0 1.35e+04 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0   610
+MatLUFactorSym         1 1.0 1.1424e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatLUFactorNum         1 1.0 7.0030e-06 1.0 8.94e+03 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  1276
+MatConvert             1 1.0 2.0517e-03 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatScale               6 1.0 6.4464e-03 1.0 5.28e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0   819
+MatResidual           36 1.0 4.9090e-02 1.0 2.19e+08 1.0 0.0e+00 0.0e+00 0.0e+00  1  8  0  0  0   1  8  0  0  0  4453
+MatAssemblyBegin      58 1.0 2.3746e-04 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatAssemblyEnd        58 1.0 2.4869e-02 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatGetRowIJ            1 1.0 1.5380e-06 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatGetOrdering         1 1.0 1.8848e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatCoarsen             3 1.0 2.6771e-02 1.0 2.40e+06 1.0 0.0e+00 0.0e+00 0.0e+00  1  0  0  0  0   1  0  0  0  0    90
+MatZeroEntries         4 1.0 1.1760e-03 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatAXPY                6 1.0 4.2356e-02 1.0 1.61e+06 1.0 0.0e+00 0.0e+00 0.0e+00  1  0  0  0  0   1  0  0  0  0    38
+MatTranspose          14 1.0 2.1409e-02 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+MatMatMultSym         12 1.0 2.2005e-01 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  4  0  0  0  0   4  0  0  0  0     0
+MatMatMultNum         12 1.0 1.8509e-01 1.0 4.31e+08 1.0 0.0e+00 0.0e+00 0.0e+00  4 16  0  0  0   4 16  0  0  0  2327
+MatPtAPSymbolic        4 1.0 4.5618e-01 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  9  0  0  0  0   9  0  0  0  0     0
+MatPtAPNumeric         4 1.0 3.3118e-01 1.0 7.89e+08 1.0 0.0e+00 0.0e+00 0.0e+00  6 30  0  0  0   6 30  0  0  0  2383
+MatGetBrAoCol          1 1.0 0.0000e+00 0.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecMDot               45 1.0 4.7489e-03 1.0 3.17e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  1  0  0  0   0  1  0  0  0  6678
+VecNorm               64 1.0 1.7527e-03 1.0 9.15e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  5218
+VecScale              49 1.0 5.3065e-04 1.0 2.96e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  5570
+VecCopy              125 1.0 1.1088e-03 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecSet               134 1.0 3.9650e-04 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecAXPY               16 1.0 5.0347e-04 1.0 3.03e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  6012
+VecAYPX              230 1.0 6.7836e-03 1.0 1.23e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  1806
+VecAXPBYCZ            72 1.0 2.7026e-03 1.0 1.34e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  1  0  0  0   0  1  0  0  0  4969
+VecMAXPY              61 1.0 7.9192e-03 1.0 5.34e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  2  0  0  0   0  2  0  0  0  6738
+VecAssemblyBegin       1 1.0 7.4410e-06 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecAssemblyEnd         1 1.0 1.1820e-06 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecPointwiseMult     177 1.0 5.2378e-03 1.0 6.60e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  1261
+VecScatterBegin      272 1.0 1.8379e-04 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecScatterEnd        272 1.0 1.8350e-04 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+VecNormalize          36 1.0 8.7547e-04 1.0 4.66e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  5326
+SFSetGraph            39 1.0 5.4470e-06 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFSetUp               39 1.0 9.7663e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFBcastBegin          12 1.0 1.1619e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFBcastEnd            12 1.0 5.0650e-06 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFReduceBegin          6 1.0 1.5111e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFReduceEnd            6 1.0 4.2950e-06 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFPack               290 1.0 2.3657e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+SFUnpack             290 1.0 3.2974e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+KSPSetUp               9 1.0 2.7867e-03 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+KSPSolve               1 1.0 3.5535e-01 1.0 1.50e+09 1.0 0.0e+00 0.0e+00 0.0e+00  7 57  0  0  0   7 57  0  0  0  4215
+KSPGMRESOrthog        42 1.0 8.7622e-03 1.0 5.83e+07 1.0 0.0e+00 0.0e+00 0.0e+00  0  2  0  0  0   0  2  0  0  0  6649
+PCSetUp_GAMG+          1 1.0 1.5283e+00 1.0 1.13e+09 1.0 0.0e+00 0.0e+00 0.0e+00 30 43  0  0  0  30 43  0  0  0   737
+ PCGAMGCreateG         3 1.0 4.5236e-01 1.0 9.11e+06 1.0 0.0e+00 0.0e+00 0.0e+00  9  0  0  0  0   9  0  0  0  0    20
+ GAMG Coarsen          3 1.0 2.9053e-02 1.0 2.40e+06 1.0 0.0e+00 0.0e+00 0.0e+00  1  0  0  0  0   1  0  0  0  0    83
+  GAMG MIS/Agg         3 1.0 2.6781e-02 1.0 2.40e+06 1.0 0.0e+00 0.0e+00 0.0e+00  1  0  0  0  0   1  0  0  0  0    90
+ PCGAMGProl            3 1.0 1.5785e-02 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+  GAMG Prol-col        3 1.0 7.9359e-05 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+  GAMG Prol-lift       3 1.0 1.4391e-02 1.0 0.00e+00 0.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0     0
+ PCGAMGOptProl         3 1.0 2.5527e-01 1.0 3.28e+08 1.0 0.0e+00 0.0e+00 0.0e+00  5 12  0  0  0   5 12  0  0  0  1286
+  GAMG smooth          3 1.0 2.0266e-01 1.0 1.15e+08 1.0 0.0e+00 0.0e+00 0.0e+00  4  4  0  0  0   4  4  0  0  0   569
+ PCGAMGCreateL         3 1.0 7.7337e-01 1.0 7.87e+08 1.0 0.0e+00 0.0e+00 0.0e+00 15 30  0  0  0  15 30  0  0  0  1017
+  GAMG PtAP            3 1.0 7.7336e-01 1.0 7.87e+08 1.0 0.0e+00 0.0e+00 0.0e+00 15 30  0  0  0  15 30  0  0  0  1017
+PCGAMG Gal l00         1 1.0 6.5871e-01 1.0 6.54e+08 1.0 0.0e+00 0.0e+00 0.0e+00 13 25  0  0  0  13 25  0  0  0   992
+PCGAMG Opt l00         1 1.0 1.6150e-01 1.0 9.86e+07 1.0 0.0e+00 0.0e+00 0.0e+00  3  4  0  0  0   3  4  0  0  0   610
+PCGAMG Gal l01         1 1.0 1.1086e-01 1.0 1.29e+08 1.0 0.0e+00 0.0e+00 0.0e+00  2  5  0  0  0   2  5  0  0  0  1165
+PCGAMG Opt l01         1 1.0 1.5155e-02 1.0 9.59e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0   633
+PCGAMG Gal l02         1 1.0 3.7817e-03 1.0 3.96e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0  1047
+PCGAMG Opt l02         1 1.0 1.5451e-03 1.0 1.14e+06 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0   738
+PCSetUp                2 1.0 1.5284e+00 1.0 1.13e+09 1.0 0.0e+00 0.0e+00 0.0e+00 30 43  0  0  0  30 43  0  0  0   737
+PCSetUpOnBlocks       12 1.0 9.3064e-05 1.0 8.94e+03 1.0 0.0e+00 0.0e+00 0.0e+00  0  0  0  0  0   0  0  0  0  0    96
+PCApply               12 1.0 2.4673e-01 1.0 1.03e+09 1.0 0.0e+00 0.0e+00 0.0e+00  5 39  0  0  0   5 39  0  0  0  4156
+------------------------------------------------------------------------------------------------------------------------
+
+Object Type          Creations   Destructions. Reports information only for process 0.
+
+--- Event Stage 0: Main Stage
+
+           Container    25             13
+              Matrix   114             77
+      Matrix Coarsen     3              3
+   Matrix Null Space     1              0
+              Vector   238            172
+           Index Set    64             61
+   Star Forest Graph    51             38
+       Krylov Solver     9              3
+      Preconditioner     9              3
+         PetscRandom     3              3
+    Distributed Mesh     6              3
+     Discrete System     6              3
+           Weak Form     6              3
+              Viewer     1              0
+========================================================================================================================
+Average time to get PetscTime(): 3.27e-08
+#PETSc Option Table entries:
+-ksp_monitor_true_residual # (source: command line)
+-log_view # (source: command line)
+-pc_gamg_verbose 2 # (source: code)
+#End of PETSc Option Table entries
+Compiled without FORTRAN kernels
+Compiled with full precision matrices (default)
+sizeof(short) 2 sizeof(int) 4 sizeof(long) 8 sizeof(void*) 8 sizeof(PetscScalar) 8 sizeof(PetscInt) 4
+Configure options: --with-debugging=0 --with-mpi=1 --with-ssl=0 --with-x=0 --with-64-bit-indices=0 --with-mumps-lib="-L/opt/aster/20240327/gcc13-openblas-ompi4/mumps-5.6.2/lib -lzmumps -ldmumps -lmumps_common -lpord -L/opt/aster/20240327/gcc13-openblas-ompi4/scotch-7.0.4/lib -lesmumps -lptscotch -lptscotcherr -lptscotcherrexit -lscotch -lscotcherr -lscotcherrexit -L/opt/aster/20240327/gcc13-openblas-ompi4/parmetis-4.0.3_aster3/lib -lparmetis" --with-mumps-include=/opt/aster/20240327/gcc13-openblas-ompi4/mumps-5.6.2/include --with-blaslapack-lib=-lopenblas --with-scalapack-lib="-L/opt/aster/20240327/gcc13-openblas-ompi4/scalapack-2.2.0/lib -lscalapack " --with-python=1 --with-petsc4py=1 --download-ml=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/pkg-trilinos-ml-v13.2.0.tar.gz --download-sowing=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/sowing_v1.1.26-p8.tar.gz --download-hypre=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/hypre_v2.29.0.tar.gz --download-superlu=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/SuperLU_v6.0.1.tar.gz --download-slepc=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/slepc-v3.20.1.tar.gz --download-slepc-configure-arguments="--with-slepc4py --download-arpack=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/arpack_3.9.0.tar.gz" --download-hpddm=/root/codeaster-prerequisites-20240327-oss/.build-gcc13-openblas-ompi4/content/3rd/hpddm_201eecd26177f88d7bb6287251877d8013fb64d2.tar.gz --with-openmp=1 --prefix=/opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5 CC=mpicc CXX=mpicxx FC=mpif90 FCFLAGS=" -fallow-argument-mismatch" LIBS="-lgomp -lz"
+-----------------------------------------
+Libraries compiled on 2025-01-23 15:23:23 on buildkitsandbox 
+Machine characteristics: Linux-5.10.230-223.885.amzn2.aarch64-aarch64-with-glibc2.40
+Using PETSc directory: /opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5
+Using PETSc arch: 
+-----------------------------------------
+
+Using C compiler: mpicc  -fPIC -Wall -Wwrite-strings -Wno-unknown-pragmas -Wno-lto-type-mismatch -Wno-stringop-overflow -fstack-protector -fvisibility=hidden -g -O  -fopenmp 
+Using Fortran compiler: mpif90  -fPIC -Wall -ffree-line-length-none -ffree-line-length-0 -Wno-lto-type-mismatch -Wno-unused-dummy-argument -g -O   -fopenmp   -fopenmp
+-----------------------------------------
+
+Using include paths: -I/opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5/include -I/opt/aster/20240327/gcc13-openblas-ompi4/mumps-5.6.2/include
+-----------------------------------------
+
+Using C linker: mpicc
+Using Fortran linker: mpif90
+Using libraries: -Wl,-rpath,/opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5/lib -L/opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5/lib -lpetsc -Wl,-rpath,/opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5/lib -L/opt/aster/20240327/gcc13-openblas-ompi4/petsc-v3.20.5/lib -L/opt/aster/20240327/gcc13-openblas-ompi4/mumps-5.6.2/lib -L/opt/aster/20240327/gcc13-openblas-ompi4/scotch-7.0.4/lib -L/opt/aster/20240327/gcc13-openblas-ompi4/parmetis-4.0.3_aster3/lib -L/opt/aster/20240327/gcc13-openblas-ompi4/scalapack-2.2.0/lib -Wl,-rpath,/usr/lib/aarch64-linux-gnu/openmpi/lib/fortran/gfortran -L/usr/lib/aarch64-linux-gnu/openmpi/lib/fortran/gfortran -Wl,-rpath,/usr/lib/gcc/aarch64-linux-gnu/13 -L/usr/lib/gcc/aarch64-linux-gnu/13 -Wl,-rpath,/usr/lib/aarch64-linux-gnu -L/usr/lib/aarch64-linux-gnu -Wl,-rpath,/lib/aarch64-linux-gnu -L/lib/aarch64-linux-gnu -lHYPRE -lzmumps -ldmumps -lmumps_common -lpord -lesmumps -lptscotch -lptscotcherr -lptscotcherrexit -lscotch -lscotcherr -lscotcherrexit -lparmetis -lscalapack -lsuperlu -lml -lopenblas -lm -lgomp -lz -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal -lhwloc -levent_core -levent_pthreads -lgfortran -lm -lgfortran -lm -lgfortran -lgcc_s -lstdc++ -lgomp -lz
+-----------------------------------------
+
+WARNING! There are options you set that were not used!
+WARNING! could be spelling mistake, etc!
+There is one unused database option. It is:
+Option left: name:-pc_gamg_verbose value: 2 source: code
+
+ ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║ <I> <CATAMESS_89>                                                                              ║
+ ║                                                                                                ║
+ ║ Liste des alarmes émises lors de l'exécution du calcul.                                        ║
+ ║                                                                                                ║
+ ║     Les alarmes que vous avez choisies d'ignorer sont précédées de (*).                        ║
+ ║     Nombre d'occurrences pour chacune des alarmes :                                            ║
+ ║            aucune alarme                                                                       ║
+ ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+<I> <FIN> ARRET NORMAL DANS "FIN" PAR APPEL A "JEFINI".
+  
+ <I> <FIN> MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :                     283.10 Mo
+ <I> <FIN> MEMOIRE JEVEUX OPTIMALE REQUISE POUR L'EXECUTION :                     396.60 Mo
+ <I> <FIN> MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS LORS DE L'EXECUTION :    1155.71 Mo
+  
+ <I>       FERMETURE DES BASES EFFECTUEE
+  
+   STATISTIQUES CONCERNANT L'ALLOCATION DYNAMIQUE :
+     TAILLE CUMULEE MAXIMUM            :                  397  Mo.
+     TAILLE CUMULEE LIBEREE            :                  291  Mo.
+     NOMBRE TOTAL D'ALLOCATIONS        :              2292940
+     NOMBRE TOTAL DE LIBERATIONS       :              2292502
+     APPELS AU MECANISME DE LIBERATION :                    0
+     TAILLE MEMOIRE CUMULEE RECUPEREE  :                    0  Mo.
+     VOLUME DES LECTURES               :                    0  Mo.
+     VOLUME DES ECRITURES              :                    0  Mo.
+  
+   MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :     283.10 Mo
+     - IMPOSE DE NOMBREUX ACCES DISQUE
+     - RALENTIT LA VITESSE D'EXECUTION
+   MEMOIRE JEVEUX OPTIMALE REQUISE POUR L'EXECUTION :     396.60 Mo
+     - LIMITE LES ACCES DISQUE
+     - AMELIORE LA VITESSE D'EXECUTION
+   MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS     :    1155.71 Mo
+     - COMPREND LA MEMOIRE CONSOMMEE PAR  JEVEUX, 
+       LE SUPERVISEUR PYTHON, LES LIBRAIRIES EXTERNES
+  
+ <I>       FIN D'EXECUTION LE : JE-23-JANV-2025 16:12:47
+INFO './glob.1' deleted
+Deleting './glob.2': No such file or directory
+INFO './vola.1' deleted
+Deleting './vola.2': No such file or directory
+
+ ********************************************************************************
+ * COMMAND                  :       USER :     SYSTEM :   USER+SYS :    ELAPSED *
+ ********************************************************************************
+ * DEBUT                    :       0.02 :       0.07 :       0.09 :       0.10 *
+ * DEFI_FICHIER             :       0.00 :       0.00 :       0.00 :       0.00 *
+ * DEFI_FICHIER             :       0.00 :       0.00 :       0.00 :       0.00 *
+ * CREA_MAILLAGE            :       0.36 :       0.04 :       0.40 :       0.40 *
+ * AFFE_MODELE              :       0.13 :       0.00 :       0.13 :       0.13 *
+ * DEFI_MATERIAU            :       0.01 :       0.00 :       0.01 :       0.02 *
+ * AFFE_MATERIAU            :       0.01 :       0.00 :       0.01 :       0.01 *
+ * AFFE_CHAR_CINE           :       0.02 :       0.00 :       0.02 :       0.02 *
+ * AFFE_CHAR_CINE           :       0.02 :       0.00 :       0.02 :       0.02 *
+ * CALC_MATR_ELEM           :       0.32 :       0.00 :       0.32 :       0.32 *
+ * NUME_DDL                 :       0.19 :       0.07 :       0.26 :       0.26 *
+ * ASSE_MATRICE             :       0.12 :       0.01 :       0.13 :       0.13 *
+ * CREA_CHAMP               :       0.01 :       0.00 :       0.01 :       0.01 *
+ * CALC_CHAR_CINE           :       0.01 :       0.00 :       0.01 :       0.02 *
+ * FIN                      :       0.02 :       0.00 :       0.02 :       0.02 *
+ *  . check syntax          :       0.00 :       0.00 :       0.00 :       0.00 *
+ *  . fortran               :       0.51 :       0.11 :       0.62 :       0.64 *
+ *  . cleanup               :       0.07 :       0.00 :       0.07 :       0.10 *
+ ********************************************************************************
+ * TOTAL_JOB                :       4.73 :       0.54 :       5.27 :       5.28 *
+ ********************************************************************************
+
+# Mémoire (Mo) :  1155.71 /  1135.65 /   396.60 /   283.10 (VmPeak / VmSize / Optimum / Minimum)
+# Fin commande #0015   user+syst:        0.02s (syst:        0.00s, elaps:        0.02s)
+# ----------------------------------------------------------------------------------------------
+End of the Code_Aster execution
+Code_Aster MPI exits normally
+Exited
+
+EXECUTION_CODE_ASTER_EXIT_155=0
+
+
+execution ended (command file #1): OK
+
+# ------------------------------------------------------------------------------
+Content of /tmp/run_aster_ewmkntq3/proc.0 after execution:
+.:
+total 64
+-rw-r--r-- 1 aster aster   187 Jan 23 16:12 155.export
+drwxr-xr-x 2 aster aster     6 Jan 23 16:12 REPE_IN
+drwxr-xr-x 2 aster aster     6 Jan 23 16:12 REPE_OUT
+-rw-r--r-- 1 aster aster 15367 Jan 23 16:12 asrun.log
+-rw-r--r-- 1 aster aster 43987 Jan 23 16:12 fort.6
+-rw-r--r-- 1 aster aster     0 Jan 23 16:12 fort.8
+-rw-r--r-- 1 aster aster     0 Jan 23 16:12 fort.9
+
+REPE_OUT:
+total 0
+
+
+# ------------------------------------------------------------------------------
+Execution summary
+                                      cpu     system    cpu+sys    elapsed
+--------------------------------------------------------------------------------
+Preparation of environment           0.00       0.00       0.00       0.00
+Execution of code_aster              5.00       0.67       5.67       5.92
+Copying results                      0.01       0.00       0.01       0.00
+--------------------------------------------------------------------------------
+Total                                5.01       0.67       5.68       5.92
+--------------------------------------------------------------------------------
+
+------------------------------------------------------------
+--- DIAGNOSTIC JOB : OK
+------------------------------------------------------------
+

@@ -16,6 +16,8 @@ if [ 1 == 0 ]; then
   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O ~/miniconda3/miniconda.sh
   bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
   rm ~/miniconda3/miniconda.sh
+  source ~/miniconda3/bin/activate
+  conda create -n codeaster_build python=3.9 -y
 fi
 
 # PATH Setting UP
@@ -30,6 +32,9 @@ module load acfl/24.04
 module load openmpi/4.1.6
 # We load python env
 source ~/miniconda3/bin/activate
+conda activate codeaster_build
+# We install necessary module python
+#pip install awsebcli
 
 # Preparing folder for compile env
 if [ ! -d "${COMPILE_ROOT}" ]; then
@@ -47,7 +52,7 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   cd ${WRKDIR}
 
   # Python setup
-  python -m venv --system-site-packages ${PYVENV_CAS}
+  #python -m venv --system-site-packages ${PYVENV_CAS}
   python -m pip install --upgrade pip
   python -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt
   mpi4py_spec=$(. ${WRKDIR}/VERSION ; printf "mpi4py==${MPI4PY}")
@@ -59,4 +64,5 @@ fi
 # Check make
 make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check
 make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv
+make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0
 
