@@ -6,6 +6,7 @@ COMPILE_ROOT=${HOME}/ACFL_CodeAster
 INSTALL_DIR=${COMPILE_ROOT}/aster
 WRKDIR=${COMPILE_ROOT}/codeaster-prerequisites-${VERSION_CAS}-oss
 PYVENV_CAS=${COMPILE_ROOT}/venv
+PYTHON39=${HOME}/python-build/python39
 ACFL_TO_GCC_LINK=${COMPILE_ROOT}/acfl_bin
 ACFL_DIR=/tools/acfl/24.04/arm-linux-compiler-24.04_AmazonLinux-2
 MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
@@ -20,9 +21,21 @@ if [ 1 == 0 ]; then
   conda create -n codeaster_build python=3.9 -y
 fi
 
+# We install python3.9.17 with staticlibs
+if [ ! -d "${PYTHON39}" ] ; then
+  mkdir -p ${PYTHON39} && cd ${PYTHON39}/../
+  wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz 
+  tar -xzf Python-3.9.17.tgz
+  cd Python-3.9.17
+  ./configure --enable-shared --enable-optimizations --with-lto --prefix=${PYTHON39}
+  make -j$(nproc)
+  sudo make altinstall
+fi
+
 # PATH Setting UP
-PATH=${ACFL_TO_GCC_LINK}:${MPI_DIR}/bin:${PATH}
+export PATH=${PYTHON39}/bin:${ACFL_TO_GCC_LINK}:${MPI_DIR}/bin:${PATH}
 #LD_LIBRARY_PATH=${ACFL_DIR}/lib64:${MPI_DIR}/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${PYTHON39}/lib:$LD_LIBRARY_PATH
 
 # Module load
 module unload all
@@ -30,14 +43,9 @@ module use /tools/acfl/24.10/modulefiles
 module use /tools/acfl/24.04/modulefiles
 module load acfl/24.04
 module load openmpi/4.1.6
-# We load python env
-source ~/miniconda3/bin/activate
-conda activate codeaster_build
-# We install necessary module python
-#pip install awsebcli
 
 # PATH Setting UP
-PATH=${PYVENV_CAS}/bin:${PATH}
+PATH=${PYVENV_CAS}/bin:${PATH} # Export ?
 
 # Preparing folder for compile env
 if [ ! -d "${COMPILE_ROOT}" ]; then
@@ -48,25 +56,24 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   ln -s ${ACFL_BIN}/armclang ${ACFL_TO_GCC_LINK}/gcc
   ln -s ${ACFL_BIN}/armclang++ ${ACFL_TO_GCC_LINK}/g++
   ln -s ${ACFL_BIN}/armflang ${ACFL_TO_GCC_LINK}/gfortran
+  ln -s $PYTHON39/bin/python3.9 ${ACFL_TO_GCC_LINK}/python3
 
   # Prerequisites DL
   wget https://www.code-aster.org/FICHIERS/prerequisites/codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
   tar xzf codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
-  cd ${WRKDIR}
+  cd ${WRKDIR} 
 
   # Python setup
-  python -m venv --system-site-packages ${PYVENV_CAS}
-  python -m pip install --upgrade pip
-  python -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt
+  python3.9 -m venv --system-site-packages ${PYVENV_CAS}
+  python3.9 -m pip install --upgrade pip 
+  python3.9 -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt
   mpi4py_spec=$(. ${WRKDIR}/VERSION ; printf "mpi4py==${MPI4PY}")
-  python -m pip install "${mpi4py_spec}"
+  python3.9 -m pip install "${mpi4py_spec}"
 else
   cd ${WRKDIR}
 fi
 
-PYTHON_LIBRARIES=/fsx/home/etud2-2/miniconda3/envs/codeaster_build/lib:/fsx/home/etud2-2/miniconda3/envs/codeaster_build/lib/python3.9/config-3.9-aarch64-linux-gnu
-# Check make
-make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check
-make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv
-make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0
-
+echo "Do those command to continue : 
+#make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check
+#make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv
+#make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0"
