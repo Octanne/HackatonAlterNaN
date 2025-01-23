@@ -15,9 +15,9 @@ MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
 #  wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2
 #  tar --bzip2 -xf boost_1_87_0.tar.bz2
 #  cd boost_1_87_0
-#  ./bootstrap.sh --prefix=${HOME}/boost-build -with-libraries=python --with-python=python3.9
-#  ./b2 python=3.9 include=${HOME}/python-build/python39/include/python3.9 library-path=${HOME}/python-build/python39/lib/python3.9
-#  ./b2 install
+#  ./bootstrap.sh --prefix=${HOME}/boost-build -with-libraries=python,filesystem,regex,system,thread,date_time,chrono,serialization --with-python=python3.9
+#  ./b2 python=3.9 include=${HOME}/python-build/python39/include/python3.9 library-path=${HOME}/python-build/python39/lib/python3.9 --prefix=${HOME}/boost-build
+#  ./b2 install -j6 --prefix=${HOME}/boost-build
 export BOOST_ROOT=${HOME}/boost-build
 
 # CMAKE https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-aarch64.sh
