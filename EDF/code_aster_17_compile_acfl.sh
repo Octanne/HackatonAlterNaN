@@ -36,6 +36,9 @@ conda activate codeaster_build
 # We install necessary module python
 #pip install awsebcli
 
+# PATH Setting UP
+PATH=${PYVENV_CAS}/bin:${PATH}
+
 # Preparing folder for compile env
 if [ ! -d "${COMPILE_ROOT}" ]; then
   mkdir -p ${COMPILE_ROOT}/ && cd ${COMPILE_ROOT}/
@@ -52,7 +55,7 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   cd ${WRKDIR}
 
   # Python setup
-  #python -m venv --system-site-packages ${PYVENV_CAS}
+  python -m venv --system-site-packages ${PYVENV_CAS}
   python -m pip install --upgrade pip
   python -m pip install -r ${WRKDIR}/reqs/requirements_dev.txt
   mpi4py_spec=$(. ${WRKDIR}/VERSION ; printf "mpi4py==${MPI4PY}")
@@ -61,6 +64,7 @@ else
   cd ${WRKDIR}
 fi
 
+PYTHON_LIBRARIES=/fsx/home/etud2-2/miniconda3/envs/codeaster_build/lib:/fsx/home/etud2-2/miniconda3/envs/codeaster_build/lib/python3.9/config-3.9-aarch64-linux-gnu
 # Check make
 make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check
 make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv
