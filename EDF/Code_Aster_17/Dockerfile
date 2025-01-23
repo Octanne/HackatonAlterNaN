@@ -155,5 +155,5 @@ RUN usermod -aG root aster
 USER aster
 # Add the line to source the script in .bashrc
 RUN echo '. /opt/aster/*/*/*_mpi.sh' >> /home/aster/.bashrc
-RUN bashrc
+
 CMD ["/bin/bash"]
