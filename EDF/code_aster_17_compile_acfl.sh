@@ -15,7 +15,8 @@ MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
 #  wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2
 #  tar --bzip2 -xf boost_1_87_0.tar.bz2
 #  cd boost_1_87_0
-#  ./bootstrap.sh --prefix=${HOME}/boost-build -with-libraries=python
+#  ./bootstrap.sh --prefix=${HOME}/boost-build -with-libraries=python --with-python=python3.9
+#  ./b2 python=3.9 include=${HOME}/python-build/python39/include/python3.9 library-path=${HOME}/python-build/python39/lib/python3.9
 #  ./b2 install
 export BOOST_ROOT=${HOME}/boost-build
 
