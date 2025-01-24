@@ -96,6 +96,10 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   
   # For Miss3d :
   # sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc to src/miss3d.sh
+  # sed -i "s/-fdefault-double-8//g" src/Makefile.inc to src/miss3d.sh
+  # sed -i "s/-fdefault-real-8//g" src/Makefile.inc to src/miss3d.sh
+  # sed -i "s/-fdefault-integer-8//g" src/Makefile.inc to src/miss3d.sh
+
 
   # Prerequisites DL
   wget https://www.code-aster.org/FICHIERS/prerequisites/codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
