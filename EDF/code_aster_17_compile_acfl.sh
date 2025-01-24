@@ -90,6 +90,9 @@ else
   cd ${WRKDIR}
 fi
 
+# We have to do this cmd :
+# /fsx/home/etud2-2/ACFL_CodeAster/codeaster-prerequisites-20240327-oss/.venv_petsc/bin/python3 -m pip install numpy
+
 echo "Do those command to continue : 
 #make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check
 #make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv
