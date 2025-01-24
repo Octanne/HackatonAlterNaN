@@ -93,6 +93,9 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
 
   # For MUMPS : 
   # Uncomment line 106 of src/mumps.sh
+  
+  # For Miss3d :
+  # sed -i "s/-mcmodel=medium/-mcmodel=small/g" src/Makefile.inc to src/miss3d.sh
 
   # Prerequisites DL
   wget https://www.code-aster.org/FICHIERS/prerequisites/codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
