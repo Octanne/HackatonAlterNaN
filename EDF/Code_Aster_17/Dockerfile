@@ -149,7 +149,7 @@ RUN apt-get install -y sudo && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # We add user 
 # Create a new user 'aster'
-RUN useradd -m -s /bin/bash aster
+RUN useradd -m -s /bin/bash aster -p aster
 # Add 'aster' to the root group
 RUN usermod -aG root aster
 USER aster
