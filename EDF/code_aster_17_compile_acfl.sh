@@ -20,6 +20,21 @@ MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
 #  ./b2 install -j6 --prefix=${HOME}/boost-build
 export BOOST_ROOT=${HOME}/boost-build
 
+# Install metis 5
+# wget https://github.com/KarypisLab/METIS/archive/refs/tags/v5.1.1-DistDGL-v0.5.tar.gz
+# tar -xvzf v5.1.1-DistDGL-v0.5.tar.gz
+# cd METIS-5.1.1-DistDGL-v0.5/
+# cd GKLib
+# wget https://github.com/KarypisLab/GKlib/archive/refs/tags/METIS-v5.1.1-DistDGL-0.5.tar.gz
+# tar -xvzf METIS-v5.1.1-DistDGL-0.5.tar.gz
+# mv GKlib-METIS-v5.1.1-DistDGL-0.5/* .
+# cd ../
+# make config shared=1 cc=gcc prefix=${HOME}/metis-build
+# make install
+
+export LD_LIBRARY_PATH=${HOME}/metis-build/lib:$LD_LIBRARY_PATH
+export CPATH=${HOME}/metis-build/include:$CPATH
+
 # CMAKE https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-aarch64.sh
 export PATH=${HOME}/cmake-3.31.4-linux-aarch64/bin:$PATH
 
