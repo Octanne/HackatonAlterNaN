@@ -149,9 +149,12 @@ RUN apt-get install -y sudo && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # We add user 
 # Create a new user 'aster'
-RUN useradd -m -s /bin/bash aster -p aster
-# Add 'aster' to the root group
-RUN usermod -aG root aster
+# Create the user, set the password, and add to groups
+RUN useradd -m -s /bin/bash aster \
+    && echo "aster:aster" | chpasswd \
+    && usermod -aG sudo aster \
+    && usermod -aG root aster
+
 USER aster
 # Add the line to source the script in .bashrc
 RUN echo '. /opt/aster/*/*/*_mpi.sh' >> /home/aster/.bashrc

@@ -1,0 +1,22 @@
+#%Module1.0
+proc ModulesHelp { } {
+    puts stderr "This module loads CMake 3.31.4 compiled with ACFL 24.04."
+}
+
+# Nom et version du logiciel
+module-whatis "Name: CMake"
+module-whatis "Version: 3.31.4"
+module-whatis "Description: Cross-platform make tool for building and managing software projects."
+
+# Définir le chemin racine de l'installation
+set root /fsx/home/etud2-2/modules_locales/cmake-3.31.4-linux-aarch64
+
+# Ajouter le binaire de CMake au PATH
+prepend-path PATH $root/bin
+
+# Ajouter les pages de manuel à MANPATH
+prepend-path MANPATH $root/man
+
+# Définir une variable spécifique à l'installation de CMake
+setenv CMAKE_HOME $root
+

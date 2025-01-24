@@ -1,0 +1,25 @@
+#%Module1.0
+proc ModulesHelp { } {
+    puts stderr "This module loads Metis 5.1.1 compiled with ACFL 24.04."
+}
+
+module-whatis "Metis 5.1.1 compiled with ACFL 24.04"
+
+# Paths to OpenBLAS
+set root /fsx/home/etud2-2/modules_locales/metis-build
+
+# Update PATH
+prepend-path PATH $root/bin
+
+# Update LD_LIBRARY_PATH
+prepend-path LD_LIBRARY_PATH $root/lib
+prepend-path LIBRARY_PATH $root/lib
+
+# Update INCLUDE paths
+prepend-path C_INCLUDE_PATH $root/include
+prepend-path CPLUS_INCLUDE_PATH $root/include
+prepend-path CPATH $root/include
+
+# Environment variables for OpenBLAS
+setenv METIS_HOME $root
+

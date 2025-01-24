@@ -1,4 +1,4 @@
-#!/bin/bash
+#:q!/bin/bash
 
 # Variables
 VERSION_CAS=20240327
@@ -6,7 +6,7 @@ COMPILE_ROOT=${HOME}/ACFL_CodeAster
 INSTALL_DIR=${COMPILE_ROOT}/aster
 WRKDIR=${COMPILE_ROOT}/codeaster-prerequisites-${VERSION_CAS}-oss
 PYVENV_CAS=${COMPILE_ROOT}/venv
-PYTHON39=${HOME}/python-build/python39
+PYTHON39=${HOME}/modules_locales/python-build/python39
 ACFL_TO_GCC_LINK=${COMPILE_ROOT}/acfl_bin
 ACFL_DIR=/tools/acfl/24.04/arm-linux-compiler-24.04_AmazonLinux-2
 MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
@@ -31,48 +31,50 @@ export BOOST_ROOT=${HOME}/boost-build
 # cd ../
 # make config shared=1 cc=gcc prefix=${HOME}/metis-build
 # make install
-export C_INCLUDE_PATH=${HOME}/metis-build/include:$C_INCLUDE_PATH
-export CPLUS_INCLUDE_PATH=${HOME}/metis-build/include:$CPLUS_INCLUDE_PATH
-export LIBRARY_PATH==${HOME}/metis-build/lib:$LIBRARY_PATH
-export LD_LIBRARY_PATH=${HOME}/metis-build/lib:$LD_LIBRARY_PATH
-export CPATH=${HOME}/metis-build/include:$CPATH
+#export C_INCLUDE_PATH=${HOME}/metis-build/include:$C_INCLUDE_PATH
+#export CPLUS_INCLUDE_PATH=${HOME}/metis-build/include:$CPLUS_INCLUDE_PATH
+#export LIBRARY_PATH==${HOME}/metis-build/lib:$LIBRARY_PATH
+#export LD_LIBRARY_PATH=${HOME}/metis-build/lib:$LD_LIBRARY_PATH
+#export CPATH=${HOME}/metis-build/include:$CPATH
 
 # CMAKE https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-aarch64.sh
-export PATH=${HOME}/cmake-3.31.4-linux-aarch64/bin:$PATH
+#export PATH=${HOME}/cmake-3.31.4-linux-aarch64/bin:$PATH
 
 # We install miniconda
-if [ 1 == 0 ]; then
-  mkdir -p ~/miniconda3
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O ~/miniconda3/miniconda.sh
-  bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-  rm ~/miniconda3/miniconda.sh
-  source ~/miniconda3/bin/activate
-  conda create -n codeaster_build python=3.9 -y
-fi
+#  mkdir -p ~/miniconda3
+#  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O ~/miniconda3/miniconda.sh
+#  bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+#  rm ~/miniconda3/miniconda.sh
+#  source ~/miniconda3/bin/activate
+#  conda create -n codeaster_build python=3.9 -y
 
 # We install python3.9.17 with staticlibs
-if [ ! -d "${PYTHON39}" ] ; then
-  mkdir -p ${PYTHON39} && cd ${PYTHON39}/../
-  wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz 
-  tar -xzf Python-3.9.17.tgz
-  cd Python-3.9.17
-  ./configure --enable-shared --enable-optimizations --with-lto --prefix=${PYTHON39}
-  make -j$(nproc)
-  sudo make altinstall
-fi
+#if [ ! -d "${PYTHON39}" ] ; then
+#  mkdir -p ${PYTHON39} && cd ${PYTHON39}/../
+#  wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz 
+#  tar -xzf Python-3.9.17.tgz
+#  cd Python-3.9.17
+#  ./configure --enable-shared --enable-optimizations --with-lto --prefix=${PYTHON39}
+#  make -j$(nproc)
+#  sudo make altinstall
+#fi
 
 # PATH Setting UP
-export PATH=${PYTHON39}/bin:${ACFL_TO_GCC_LINK}:${PATH}
 #LD_LIBRARY_PATH=${ACFL_DIR}/lib64:${MPI_DIR}/lib:$LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=${PYTHON39}/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=${PYTHON39}/lib:$LD_LIBRARY_PATH
+export PATH=${ACFL_TO_GCC_LINK}:${PATH}
 
 # Module load
-module unload all
+module purge
+module unuse /tools/acfl/24.04/modulefiles
+module unuse ${HOME}/modules_locales/modulefiles 
 module use /tools/acfl/24.04/modulefiles
-module use ~/modules_acfl/
+module use ${HOME}/modules_locales/modulefiles
 module load acfl/24.04
 module load openblas/24.04
 module load openmpi/4.1.7
+module load python/3.9
+module load cmake/3.31.4
 
 # PATH Setting UP
 PATH=${PYVENV_CAS}/bin:${PATH}
@@ -86,7 +88,7 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   ln -s ${ACFL_DIR}/bin/armclang ${ACFL_TO_GCC_LINK}/gcc
   ln -s ${ACFL_DIR}/bin/armclang++ ${ACFL_TO_GCC_LINK}/g++
   ln -s ${ACFL_DIR}/bin/armflang ${ACFL_TO_GCC_LINK}/gfortran
-  ln -s $PYTHON39/bin/python3.9 ${ACFL_TO_GCC_LINK}/python3
+  #ln -s $PYTHON39/bin/python3.9 ${ACFL_TO_GCC_LINK}/python3
 
   # For BLACS in Scalapack adding :
   # -DCMAKE_C_FLAGS="${CFLAGS} -fpermissive -Wno-error=implicit-function-declaration" \

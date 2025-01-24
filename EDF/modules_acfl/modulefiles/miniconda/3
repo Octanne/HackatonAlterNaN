@@ -1,0 +1,45 @@
+#%Module1.0
+proc ModulesHelp { } {
+    puts stderr "This module loads Miniconda3."
+}
+
+# Nom et description
+module-whatis "Name: Miniconda3"
+module-whatis "Version: Python 3.12.8 (py312)"
+module-whatis "Description: Miniconda3 is a minimal installer for Conda, a package and environment manager."
+
+# Définir le chemin racine de l'installation
+set root /fsx/home/etud2-2/miniconda3
+
+# Ajouter les binaires de conda à PATH
+prepend-path PATH $root/bin
+
+# Ajouter les bibliothèques à LD_LIBRARY_PATH
+prepend-path LD_LIBRARY_PATH $root/lib
+
+# Ajouter les pages de manuel à MANPATH (si disponibles)
+prepend-path MANPATH $root/share/man
+
+# Définir une variable d'environnement spécifique à Miniconda3
+setenv CONDA_HOME $root
+
+proc LoadConda { } {
+    puts stdout "Loading Miniconda3 Python 3.12.8 from $root"
+    
+    # Initialiser conda en chargeant conda.sh
+    if { [file exists "$root/etc/profile.d/conda.sh"] } {
+        # Source conda.sh sans utiliser exec
+        source $root/etc/profile.d/conda.sh
+    } else {
+        puts stderr "conda.sh not found in $root/etc/profile.d/"
+    }
+}
+
+proc UnloadConda{ } {
+    puts stdout "Unloading Miniconda3 Python 3.12.8"
+
+    # Désactiver Conda s'il est actif
+    if { [catch {exec conda deactivate} result] } {
+        puts stderr "Failed to deactivate conda: $result"
+    }
+}
