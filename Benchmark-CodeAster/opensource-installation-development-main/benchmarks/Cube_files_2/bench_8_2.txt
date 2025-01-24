@@ -1,0 +1,1299 @@
+WARNING: If MPI_Abort is called during execution, result files could not be copied.
+Running: mpiexec -n 2 --tag-output /opt/aster/install/mpi/bin/run_aster -n 2 --wrkdir /tmp/run_aster_ugwvoxmg --status-file /home/aster/.tmp_run_aster/run_aster_rqpug0hp/__status__ --no-mpi /home/aster/.tmp_run_aster/run_aster_rqpug0hp/Cube_perf.0
+[1,0]<stdout>:
+[1,0]<stdout>:# ------------------------------------------------------------------------------
+[1,0]<stdout>:Execution of code_aster
+[1,0]<stdout>:
+[1,0]<stdout>:# ------------------------------------------------------------------------------
+[1,0]<stdout>:Prepare environment in /tmp/run_aster_ugwvoxmg/proc.0
+[1,0]<stdout>:
+[1,0]<stdout>:# ------------------------------------------------------------------------------
+[1,0]<stdout>:Command file #1 / 1
+[1,0]<stdout>:
+[1,0]<stdout>:Content of the file to execute:
+[1,0]<stdout>:# coding=utf-8
+[1,0]<stdout>:#!/usr/bin/python
+[1,0]<stdout>:
+[1,0]<stdout>:import os
+[1,0]<stdout>:from statistics import mean
+[1,0]<stdout>:from datetime import datetime
+[1,0]<stdout>:from resource import RUSAGE_SELF, getrusage
+[1,0]<stdout>:
+[1,0]<stdout>:from code_aster.Commands import *
+[1,0]<stdout>:from code_aster import CA
+[1,0]<stdout>:from code_aster.Utilities import petscInitialize
+[1,0]<stdout>:
+[1,0]<stdout>:CA.init()
+[1,0]<stdout>:
+[1,0]<stdout>:params = {}
+[1,0]<stdout>:params["refinements"] = int(os.environ.get("REFINE", 1))
+[1,0]<stdout>:params["parallel"] = os.environ.get("USE_LEGACY", "HPC")
+[1,0]<stdout>:params["solver"] = os.environ.get("SOLVER", "PETSC")
+[1,0]<stdout>:
+[1,0]<stdout>:# General parameters
+[1,0]<stdout>:comm = CA.MPI.ASTER_COMM_WORLD
+[1,0]<stdout>:rank = comm.Get_rank()
+[1,0]<stdout>:size = comm.Get_size()
+[1,0]<stdout>:
+[1,0]<stdout>:nbHexa = 8 ** params["refinements"]
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:def memory_peak(mess=None):
+[1,0]<stdout>:    """Return memory peak in MB"""
+[1,0]<stdout>:    return int(getrusage(RUSAGE_SELF).ru_maxrss / 1024)
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:class ChronoCtxMgGen:
+[1,0]<stdout>:    stats = {}
+[1,0]<stdout>:
+[1,0]<stdout>:    def __init__(self, what):
+[1,0]<stdout>:        self._what = what
+[1,0]<stdout>:
+[1,0]<stdout>:    def __enter__(self):
+[1,0]<stdout>:        self.start = datetime.now()
+[1,0]<stdout>:
+[1,0]<stdout>:    def __exit__(self, exctype, exc, tb):
+[1,0]<stdout>:        self.stop = datetime.now()
+[1,0]<stdout>:        delta = self.stop - self.start
+[1,0]<stdout>:        mem = memory_peak(self._what)
+[1,0]<stdout>:        self.stats[self._what] = [delta.total_seconds(), mem]
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:class ChronoCtxMg(ChronoCtxMgGen):
+[1,0]<stdout>:    pass
+[1,0]<stdout>:    # def __init__(self, what):
+[1,0]<stdout>:    #     ChronoCtxMgGen.__init__(self, what)
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:def write_stats(nume_ddl):
+[1,0]<stdout>:    if rank == 0:
+[1,0]<stdout>:        print("TITLE: TEST PERF CUBE")
+[1,0]<stdout>:        print()
+[1,0]<stdout>:        print("NB PROC")
+[1,0]<stdout>:        print(size)
+[1,0]<stdout>:        print()
+[1,0]<stdout>:        print(
+[1,0]<stdout>:            "COMMAND, TIME MIN (s), TIME MAX (s), TIME MEAN (s), MEM MIN (Mo), MEM MAX (Mo), MEM MEAN (Mo)"
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    for key, values in stats.items():
+[1,0]<stdout>:        time = comm.gather(values[0], root=0)
+[1,0]<stdout>:        mem = comm.gather(values[1], root=0)
+[1,0]<stdout>:        if rank == 0:
+[1,0]<stdout>:            print(
+[1,0]<stdout>:                key
+[1,0]<stdout>:                + ", "
+[1,0]<stdout>:                + str(min(time))
+[1,0]<stdout>:                + ", "
+[1,0]<stdout>:                + str(max(time))
+[1,0]<stdout>:                + ", "
+[1,0]<stdout>:                + str(mean(time))
+[1,0]<stdout>:                + ", "
+[1,0]<stdout>:                + str(min(mem))
+[1,0]<stdout>:                + ", "
+[1,0]<stdout>:                + str(max(mem))
+[1,0]<stdout>:                + ", "
+[1,0]<stdout>:                + str(m[1,0]<stdout>:ean(mem))
+[1,0]<stdout>:            )
+[1,0]<stdout>:
+[1,0]<stdout>:    mesh = nume_ddl.getMesh()
+[1,0]<stdout>:    nodes = len(mesh.getInnerNodes())
+[1,0]<stdout>:    nodes = comm.allreduce(nodes, CA.MPI.SUM)
+[1,0]<stdout>:
+[1,0]<stdout>:    if rank == 0:
+[1,0]<stdout>:        print()
+[1,0]<stdout>:        print("NB CELLS, NB NODES, NB DOFS")
+[1,0]<stdout>:        print(str(nbHexa) + ", " + str(nodes) + ", " + str(nume_ddl.getNumberOfDofs()))
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:def print_markdown_table(data, refine, nbcells, nbnodes, nbdofs):
+[1,0]<stdout>:    """Print a table of the mean time as a Markdown table."""
+[1,0]<stdout>:
+[1,0]<stdout>:    def show(*args, **kwargs):
+[1,0]<stdout>:        if rank == 0:
+[1,0]<stdout>:            print(*args, **kwargs)
+[1,0]<stdout>:
+[1,0]<stdout>:    fmti = "| {0:<16s} | {1:11,d} |"
+[1,0]<stdout>:    fmtt = "| {0:<16s} | {1:11.2f} |"
+[1,0]<stdout>:    separ = "| :--------------- | ----------: |"
+[1,0]<stdout>:    show(fmti.format("Refinement", refine))
+[1,0]<stdout>:    show(separ)
+[1,0]<stdout>:    show(fmti.format("Number of cells", nbcells).replace(",", " "))
+[1,0]<stdout>:    show(fmti.format("Number of nodes", nbnodes).replace(",", " "))
+[1,0]<stdout>:    show(fmti.format("Number of DOFs", nbdofs).replace(",", " "))
+[1,0]<stdout>:    show(fmti.format("Number of procs", size).replace(",", " "))
+[1,0]<stdout>:    show(fmti.format("Nb of DOFs/proc", nbdofs // size).replace(",", " "))
+[1,0]<stdout>:    for key, values in data.items():
+[1,0]<stdout>:        times = comm.gather(values[0], root=0)
+[1,0]<stdout>:        # mem = comm.gather(values[1], root=0)
+[1,0]<stdout>:        if rank == 0:
+[1,0]<stdout>:            show(fmtt.format(key, mean(times)))
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:# petscInitialize('-ksp_monitor_true_residual -stats' )
+[1,0]<stdout>:petscInitialize("-ksp_monitor_true_residual -log_view")
+[1,0]<stdout>:
+[1,0]<stdout>:with ChronoCtxMg("Total"):
+[1,0]<stdout>:    with ChronoCtxMg("Build mesh"):
+[1,0]<stdout>:        if params["parallel"] == "HPC":
+[1,0]<stdout>:            mesh = CA.ParallelMesh.buildCube(refine=params["refinements"])
+[1,0]<stdout>:        else:
+[1,0]<stdout>:            mesh = CA.Mesh.buildCube(refine=params["refinements"])
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Model"):
+[1,0]<stdout>:        model = AFFE_MODELE(
+[1,0]<stdout>:            MAILLAGE=mesh,
+[1,0]<stdout>:            AFFE=_F(
+[1,0]<stdout>:                TOUT="OUI",
+[1,0]<stdout>:                PHENOMENE="MECANIQUE",
+[1,0]<stdout>:                MODELISATION="3D",
+[1,0]<stdout>:            ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Material"):
+[1,0]<stdout>:        steel = DEFI_MATERIAU(
+[1,0]<stdout>:            ELAS=_F(
+[1,0]<stdout>:                E=200000.0,
+[1,0]<stdout>:                NU=0.3,
+[1,0]<stdout>:            ),
+[1,0]<stdout>:            ECRO_LINE=_F(
+[1,0]<stdout>:    [1,0]<stdout>:            D_SIGM_EPSI=2000.0,
+[1,0]<stdout>:                SY=200.0,
+[1,0]<stdout>:            ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:        mater = AFFE_MATERIAU(
+[1,0]<stdout>:            MAILLAGE=mesh,
+[1,0]<stdout>:            AFFE=_F(
+[1,0]<stdout>:                TOUT="OUI",
+[1,0]<stdout>:                MATER=steel,
+[1,0]<stdout>:            ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Boundary conditions"):
+[1,0]<stdout>:        block = AFFE_CHAR_CINE(
+[1,0]<stdout>:            MODELE=model,
+[1,0]<stdout>:            MECA_IMPO=(
+[1,0]<stdout>:                _F(
+[1,0]<stdout>:                    GROUP_MA="LEFT",
+[1,0]<stdout>:                    DX=0,
+[1,0]<stdout>:                    DY=0.0,
+[1,0]<stdout>:                    DZ=0.0,
+[1,0]<stdout>:                ),
+[1,0]<stdout>:            ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:        imposed_displ = AFFE_CHAR_CINE(
+[1,0]<stdout>:            MODELE=model,
+[1,0]<stdout>:            MECA_IMPO=(
+[1,0]<stdout>:                _F(
+[1,0]<stdout>:                    GROUP_MA="RIGHT",
+[1,0]<stdout>:                    DY=0.001,
+[1,0]<stdout>:                    DZ=0.001,
+[1,0]<stdout>:                ),
+[1,0]<stdout>:            ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Create matrix"):
+[1,0]<stdout>:        stiff_elem = CALC_MATR_ELEM(
+[1,0]<stdout>:            MODELE=model,
+[1,0]<stdout>:            OPTION="RIGI_MECA",
+[1,0]<stdout>:            CHAM_MATER=mater,
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Numbering"):
+[1,0]<stdout>:        dofNum = NUME_DDL(
+[1,0]<stdout>:            MATR_RIGI=stiff_elem,
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Assembly"):
+[1,0]<stdout>:        stiffness = ASSE_MATRICE(
+[1,0]<stdout>:            MATR_ELEM=stiff_elem,
+[1,0]<stdout>:            NUME_DDL=dofNum,
+[1,0]<stdout>:            CHAR_CINE=(block, imposed_displ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Build RHS"):
+[1,0]<stdout>:        rhs = CREA_CHAMP(
+[1,0]<stdout>:            TYPE_CHAM="NOEU_DEPL_R",
+[1,0]<stdout>:            OPERATION="AFFE",
+[1,0]<stdout>:            MAILLAGE=mesh,
+[1,0]<stdout>:            AFFE=_F(
+[1,0]<stdout>:                TOUT="OUI",
+[1,0]<stdout>:                NOM_CMP=(
+[1,0]<stdout>:                    "DX",
+[1,0]<stdout>:                    "DY",
+[1,0]<stdout>:                    "DZ",
+[1,0]<stdout>:                ),
+[1,0]<stdout>:                VALE=(
+[1,0]<stdout>:                    0.0,
+[1,0]<stdout>:                    0.0,
+[1,0]<stdout>:                    0.0,
+[1,0]<stdout>:                ),
+[1,0]<stdout>:            ),
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:        load_vector = CALC_CHAR_CINE(NUME_DDL=dofNum, CHAR_CINE=(block, imposed_displ))
+[1,0]<stdout>:
+[1,0]<stdout>:    if params["solver"] == "PETSC":
+[1,0]<stdout>:        solver = CA.PetscSolver(RENUM="SANS", PRE_COND="GAMG")
+[1,0]<stdout>:    elif params["solver"] == "MUMPS":
+[1,0]<stdout>:        solver = CA.MumpsSolver(
+[1,0]<stdout>:            MATR_DISTRIBUEE="OUI",
+[1,0]<stdout>:            RENUM="PARMETIS",
+[1,0]<stdout>:            ACCELERATION="FR+",
+[1,0]<stdout>:            POSTTRAITEMENTS="MINI",
+[1,0]<stdout>:        )
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Factorize"):
+[1,0]<stdout>:        solver.factorize(stiffness)
+[1,0]<stdout>:
+[1,0]<stdout>:    with ChronoCtxMg("Solve"):
+[1,0]<stdout>:        resu = solver.solve(rhs, load_vector)
+[1,0]<stdout>:
+[1,0]<stdout>:# write_stats(dofNum)
+[1,0]<stdout>:nbNodes = len(mesh.getInnerNodes())
+[1,0]<stdout>:if params["parallel"] == "HPC":
+[1,0]<stdout>:    nbNodes = comm.allreduce(nbNodes, CA.MPI.SUM)
+[1,0]<stdout>:nbDOFs = dofNum.getNumberOfDOFs()
+[1,0]<stdout>:print_markdown_table(ChronoCtxMg.stats, params["refinements"], nbHexa, nbNodes, nbDOFs)
+[1,0]<stdout>:
+[1,0]<stdout>:CA.close()
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:# ------------------------------------------------------------------------------
+[1,0]<stdout>:Command line #1:
+[1,0]<stdout>:    ulimit -c unlimited ; ulimit -t 108000 ; ( /opt/venv/bin/python3 -m mpi4py /home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/Cube_perf.py --last --tpmax 86400 ; echo $? > _exit_code_ ) 2>&1 | tee -a fort.6
+[1,1]<stdout>:
+[1,1]<stdout>:# ------------------------------------------------------------------------------
+[1,1]<stdout>:Execution of code_aster
+[1,1]<stdout>:
+[1,1]<stdout>:# ------------------------------------------------------------------------------
+[1,1]<stdout>:Prepare environment in /tmp/run_aster_ugwvoxmg/proc.1
+[1,1]<stdout>:
+[1,1]<stdout>:# ------------------------------------------------------------------------------
+[1,1]<stdout>:Command file #1 / 1
+[1,1]<stdout>:
+[1,1]<stdout>:Content of the file to execute:
+[1,1]<stdout>:# coding=utf-8
+[1,1]<stdout>:#!/usr/bin/python
+[1,1]<stdout>:
+[1,1]<stdout>:import os
+[1,1]<stdout>:from statistics import mean
+[1,1]<stdout>:from datetime import datetime
+[1,1]<stdout>:from resource import RUSAGE_SELF, getrusage
+[1,1]<stdout>:
+[1,1]<stdout>:from code_aster.Commands import *
+[1,1]<stdout>:from code_aster import CA
+[1,1]<stdout>:from code_aster.Utilities import petscInitialize
+[1,1]<stdout>:
+[1,1]<stdout>:CA.init()
+[1,1]<stdout>:
+[1,1]<stdout>:params = {}
+[1,1]<stdout>:params["refinements"] = int(os.environ.get("REFINE", 1))
+[1,1]<stdout>:params["parallel"] = os.environ.get("USE_LEGACY", "HPC")
+[1,1]<stdout>:params["solver"] = os.environ.get("SOLVER", "PETSC")
+[1,1]<stdout>:
+[1,1]<stdout>:# General parameters
+[1,1]<stdout>:comm = CA.MPI.ASTER_COMM_WORLD
+[1,1]<stdout>:rank = comm.Get_rank()
+[1,1]<stdout>:size = comm.Get_size()
+[1,1]<stdout>:
+[1,1]<stdout>:nbHexa = 8 ** params["refinements"]
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:def memory_peak(mess=None):
+[1,1]<stdout>:    """Return memory peak in MB"""
+[1,1]<stdout>:    return int(getrusage(RUSAGE_SELF).ru_maxrss / 1024)
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:class ChronoCtxMgGen:
+[1,1]<stdout>:    stats = {}
+[1,1]<stdout>:
+[1,1]<stdout>:    def __init__(self, what):
+[1,1]<stdout>:        self._what = what
+[1,1]<stdout>:
+[1,1]<stdout>:    def __enter__(self):
+[1,1]<stdout>:        self.start = datetime.now()
+[1,1]<stdout>:
+[1,1]<stdout>:    def __exit__(self, exctype, exc, tb):
+[1,1]<stdout>:        self.stop = datetime.now()
+[1,1]<stdout>:        delta = self.stop - self.start
+[1,1]<stdout>:        mem = memory_peak(self._what)
+[1,1]<stdout>:        self.stats[self._what] = [delta.total_seconds(), mem]
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:class ChronoCtxMg(ChronoCtxMgGen):
+[1,1]<stdout>:    pass
+[1,1]<stdout>:    # def __init__(self, what):
+[1,1]<stdout>:    #     ChronoCtxMgGen.__init__(self, what)
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:def write_stats(nume_ddl):
+[1,1]<stdout>:    if rank == 0:
+[1,1]<stdout>:        print("TITLE: TEST PERF CUBE")
+[1,1]<stdout>:        print()
+[1,1]<stdout>:        print("NB PROC")
+[1,1]<stdout>:        print(size)
+[1,1]<stdout>:        print()
+[1,1]<stdout>:        print(
+[1,1]<stdout>:            "COMMAND, TIME MIN (s), TIME MAX (s), TIME MEAN (s), MEM MIN (Mo), MEM MAX (Mo), MEM MEAN (Mo)"
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    for key, values in stats.items():
+[1,1]<stdout>:        time = comm.gather(values[0], root=0)
+[1,1]<stdout>:        mem = comm.gather(values[1], root=0)
+[1,1]<stdout>:        if rank == 0:
+[1,1]<stdout>:            print(
+[1,1]<stdout>:                key
+[1,1]<stdout>:                + ", "
+[1,1]<stdout>:                + str(min(time))
+[1,1]<stdout>:                + ", "
+[1,1]<stdout>:                + str(max(time))
+[1,1]<stdout>:                + ", "
+[1,1]<stdout>:                + str(mean(time))
+[1,1]<stdout>:                + ", "
+[1,1]<stdout>:                + str(min(mem))
+[1,1]<stdout>:                + ", "
+[1,1]<stdout>:                + str(max(mem))
+[1,1]<stdout>:                + ", "
+[1,1]<stdout>:                + str(m[1,1]<stdout>:ean(mem))
+[1,1]<stdout>:            )
+[1,1]<stdout>:
+[1,1]<stdout>:    mesh = nume_ddl.getMesh()
+[1,1]<stdout>:    nodes = len(mesh.getInnerNodes())
+[1,1]<stdout>:    nodes = comm.allreduce(nodes, CA.MPI.SUM)
+[1,1]<stdout>:
+[1,1]<stdout>:    if rank == 0:
+[1,1]<stdout>:        print()
+[1,1]<stdout>:        print("NB CELLS, NB NODES, NB DOFS")
+[1,1]<stdout>:        print(str(nbHexa) + ", " + str(nodes) + ", " + str(nume_ddl.getNumberOfDofs()))
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:def print_markdown_table(data, refine, nbcells, nbnodes, nbdofs):
+[1,1]<stdout>:    """Print a table of the mean time as a Markdown table."""
+[1,1]<stdout>:
+[1,1]<stdout>:    def show(*args, **kwargs):
+[1,1]<stdout>:        if rank == 0:
+[1,1]<stdout>:            print(*args, **kwargs)
+[1,1]<stdout>:
+[1,1]<stdout>:    fmti = "| {0:<16s} | {1:11,d} |"
+[1,1]<stdout>:    fmtt = "| {0:<16s} | {1:11.2f} |"
+[1,1]<stdout>:    separ = "| :--------------- | ----------: |"
+[1,1]<stdout>:    show(fmti.format("Refinement", refine))
+[1,1]<stdout>:    show(separ)
+[1,1]<stdout>:    show(fmti.format("Number of cells", nbcells).replace(",", " "))
+[1,1]<stdout>:    show(fmti.format("Number of nodes", nbnodes).replace(",", " "))
+[1,1]<stdout>:    show(fmti.format("Number of DOFs", nbdofs).replace(",", " "))
+[1,1]<stdout>:    show(fmti.format("Number of procs", size).replace(",", " "))
+[1,1]<stdout>:    show(fmti.format("Nb of DOFs/proc", nbdofs // size).replace(",", " "))
+[1,1]<stdout>:    for key, values in data.items():
+[1,1]<stdout>:        times = comm.gather(values[0], root=0)
+[1,1]<stdout>:        # mem = comm.gather(values[1], root=0)
+[1,1]<stdout>:        if rank == 0:
+[1,1]<stdout>:            show(fmtt.format(key, mean(times)))
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:# petscInitialize('-ksp_monitor_true_residual -stats' )
+[1,1]<stdout>:petscInitialize("-ksp_monitor_true_residual -log_view")
+[1,1]<stdout>:
+[1,1]<stdout>:with ChronoCtxMg("Total"):
+[1,1]<stdout>:    with ChronoCtxMg("Build mesh"):
+[1,1]<stdout>:        if params["parallel"] == "HPC":
+[1,1]<stdout>:            mesh = CA.ParallelMesh.buildCube(refine=params["refinements"])
+[1,1]<stdout>:        else:
+[1,1]<stdout>:            mesh = CA.Mesh.buildCube(refine=params["refinements"])
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Model"):
+[1,1]<stdout>:        model = AFFE_MODELE(
+[1,1]<stdout>:            MAILLAGE=mesh,
+[1,1]<stdout>:            AFFE=_F(
+[1,1]<stdout>:                TOUT="OUI",
+[1,1]<stdout>:                PHENOMENE="MECANIQUE",
+[1,1]<stdout>:                MODELISATION="3D",
+[1,1]<stdout>:            ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Material"):
+[1,1]<stdout>:        steel = DEFI_MATERIAU(
+[1,1]<stdout>:            ELAS=_F(
+[1,1]<stdout>:                E=200000.0,
+[1,1]<stdout>:                NU=0.3,
+[1,1]<stdout>:            ),
+[1,1]<stdout>:            ECRO_LINE=_F(
+[1,1]<stdout>:    [1,1]<stdout>:            D_SIGM_EPSI=2000.0,
+[1,1]<stdout>:                SY=200.0,
+[1,1]<stdout>:            ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:        mater = AFFE_MATERIAU(
+[1,1]<stdout>:            MAILLAGE=mesh,
+[1,1]<stdout>:            AFFE=_F(
+[1,1]<stdout>:                TOUT="OUI",
+[1,1]<stdout>:                MATER=steel,
+[1,1]<stdout>:            ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Boundary conditions"):
+[1,1]<stdout>:        block = AFFE_CHAR_CINE(
+[1,1]<stdout>:            MODELE=model,
+[1,1]<stdout>:            MECA_IMPO=(
+[1,1]<stdout>:                _F(
+[1,1]<stdout>:                    GROUP_MA="LEFT",
+[1,1]<stdout>:                    DX=0,
+[1,1]<stdout>:                    DY=0.0,
+[1,1]<stdout>:                    DZ=0.0,
+[1,1]<stdout>:                ),
+[1,1]<stdout>:            ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:        imposed_displ = AFFE_CHAR_CINE(
+[1,1]<stdout>:            MODELE=model,
+[1,1]<stdout>:            MECA_IMPO=(
+[1,1]<stdout>:                _F(
+[1,1]<stdout>:                    GROUP_MA="RIGHT",
+[1,1]<stdout>:                    DY=0.001,
+[1,1]<stdout>:                    DZ=0.001,
+[1,1]<stdout>:                ),
+[1,1]<stdout>:            ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Create matrix"):
+[1,1]<stdout>:        stiff_elem = CALC_MATR_ELEM(
+[1,1]<stdout>:            MODELE=model,
+[1,1]<stdout>:            OPTION="RIGI_MECA",
+[1,1]<stdout>:            CHAM_MATER=mater,
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Numbering"):
+[1,1]<stdout>:        dofNum = NUME_DDL(
+[1,1]<stdout>:            MATR_RIGI=stiff_elem,
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Assembly"):
+[1,1]<stdout>:        stiffness = ASSE_MATRICE(
+[1,1]<stdout>:            MATR_ELEM=stiff_elem,
+[1,1]<stdout>:            NUME_DDL=dofNum,
+[1,1]<stdout>:            CHAR_CINE=(block, imposed_displ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Build RHS"):
+[1,1]<stdout>:        rhs = CREA_CHAMP(
+[1,1]<stdout>:            TYPE_CHAM="NOEU_DEPL_R",
+[1,1]<stdout>:            OPERATION="AFFE",
+[1,1]<stdout>:            MAILLAGE=mesh,
+[1,1]<stdout>:            AFFE=_F(
+[1,1]<stdout>:                TOUT="OUI",
+[1,1]<stdout>:                NOM_CMP=(
+[1,1]<stdout>:                    "DX",
+[1,1]<stdout>:                    "DY",
+[1,1]<stdout>:                    "DZ",
+[1,1]<stdout>:                ),
+[1,1]<stdout>:                VALE=(
+[1,1]<stdout>:                    0.0,
+[1,1]<stdout>:                    0.0,
+[1,1]<stdout>:                    0.0,
+[1,1]<stdout>:                ),
+[1,1]<stdout>:            ),
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:        load_vector = CALC_CHAR_CINE(NUME_DDL=dofNum, CHAR_CINE=(block, imposed_displ))
+[1,1]<stdout>:
+[1,1]<stdout>:    if params["solver"] == "PETSC":
+[1,1]<stdout>:        solver = CA.PetscSolver(RENUM="SANS", PRE_COND="GAMG")
+[1,1]<stdout>:    elif params["solver"] == "MUMPS":
+[1,1]<stdout>:        solver = CA.MumpsSolver(
+[1,1]<stdout>:            MATR_DISTRIBUEE="OUI",
+[1,1]<stdout>:            RENUM="PARMETIS",
+[1,1]<stdout>:            ACCELERATION="FR+",
+[1,1]<stdout>:            POSTTRAITEMENTS="MINI",
+[1,1]<stdout>:        )
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Factorize"):
+[1,1]<stdout>:        solver.factorize(stiffness)
+[1,1]<stdout>:
+[1,1]<stdout>:    with ChronoCtxMg("Solve"):
+[1,1]<stdout>:        resu = solver.solve(rhs, load_vector)
+[1,1]<stdout>:
+[1,1]<stdout>:# write_stats(dofNum)
+[1,1]<stdout>:nbNodes = len(mesh.getInnerNodes())
+[1,1]<stdout>:if params["parallel"] == "HPC":
+[1,1]<stdout>:    nbNodes = comm.allreduce(nbNodes, CA.MPI.SUM)
+[1,1]<stdout>:nbDOFs = dofNum.getNumberOfDOFs()
+[1,1]<stdout>:print_markdown_table(ChronoCtxMg.stats, params["refinements"], nbHexa, nbNodes, nbDOFs)
+[1,1]<stdout>:
+[1,1]<stdout>:CA.close()
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:# ------------------------------------------------------------------------------
+[1,1]<stdout>:Command line #1:
+[1,1]<stdout>:    ulimit -c unlimited ; ulimit -t 108000 ; ( /opt/venv/bin/python3 -m mpi4py /home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/Cube_perf.py --last --tpmax 86400 ; echo $? > _exit_code_ ) 2>&1 | tee -a fort.6
+[1,0]<stdout>:setting '--memory' value to 3686.40 MB (keyword RESERVE_MEMOIRE)
+[1,1]<stdout>:setting '--memory' value to 3686.40 MB (keyword RESERVE_MEMOIRE)
+[1,0]<stdout>:checking MPI initialization...
+[1,0]<stdout>:using COMM_WORLD.
+[1,0]<stdout>:MPI is initialized.
+[1,1]<stdout>:checking MPI initialization...
+[1,1]<stdout>:using COMM_WORLD.
+[1,1]<stdout>:MPI is initialized.
+[1,0]<stdout>:Ouverture en écriture du fichier ./vola.1
+[1,0]<stdout>:
+[1,1]<stdout>:Ouverture en écriture du fichier ./vola.1
+[1,1]<stdout>:
+[1,0]<stdout>:<INFO> Démarrage de l'exécution.
+[1,0]<stdout>:
+[1,1]<stdout>:<INFO> Démarrage de l'exécution.
+[1,1]<stdout>:
+[1,1]<stdout>:                       -- CODE_ASTER -- VERSION : DÉVELOPPEMENT (unstable) --                       
+[1,0]<stdout>:                       -- CODE_ASTER -- VERSION : DÉVELOPPEMENT (unstable) --                       
+[1,1]<stdout>:                               Version 17.2.4 modifiée le 20/01/2025                                
+[1,1]<stdout>:                               révision f855b56619c7 - branche 'main'                               
+[1,0]<stdout>:                               Version 17.2.4 modifiée le 20/01/2025                                
+[1,0]<stdout>:                               révision f855b56619c7 - branche 'main'                               
+[1,1]<stdout>:                                   Copyright EDF R&D 1991 - 2025                                    
+[1,1]<stdout>:                                                                                                    
+[1,1]<stdout>:                              Exécution du : Thu Jan 23 16:51:09 2025                               
+[1,1]<stdout>:                                  Nom de la machine : 8b87b9d0b29a                                  
+[1,1]<stdout>:                                        Architecture : 64bit                                        
+[1,1]<stdout>:                                    Type de processeur : aarch64                                    
+[1,1]<stdout>:        Système d'exploitation : Linux-5.10.226-214.880.amzn2.aarch64-aarch64-with-glibc2.40        
+[1,1]<stdout>:                                  Langue des messages : en (UTF-8)                                  
+[1,0]<stdout>:                                   Copyright EDF R&D 1991 - 2025                                    
+[1,0]<stdout>:                                                                                                    
+[1,0]<stdout>:                              Exécution du : Thu Jan 23 16:51:09 2025                               
+[1,0]<stdout>:                                  Nom de la machine : 8b87b9d0b29a                                  
+[1,0]<stdout>:                                        Architecture : 64bit                                        
+[1,0]<stdout>:                                    Type de processeur : aarch64                                    
+[1,0]<stdout>:        Système d'exploitation : Linux-5.10.226-214.880.amzn2.aarch64-aarch64-with-glibc2.40        
+[1,0]<stdout>:                                  Langue des messages : en (UTF-8)                                  
+[1,1]<stdout>:                                     Version de Python : 3.11.2                                     
+[1,1]<stdout>:                                     Version de NumPy : 1.24.2                                      
+[1,0]<stdout>:                                     Version de Python : 3.11.2                                     
+[1,0]<stdout>:                                     Version de NumPy : 1.24.2                                      
+[1,0]<stdout>:                                      Parallélisme MPI : actif                                      
+[1,0]<stdout>:                                   Rang du processeur courant : 0                                   
+[1,0]<stdout>:                               Nombre de processeurs MPI utilisés : 2                               
+[1,1]<stdout>:                                      Parallélisme MPI : actif                                      
+[1,1]<stdout>:                                   Rang du processeur courant : 1                                   
+[1,1]<stdout>:                               Nombre de processeurs MPI utilisés : 2                               
+[1,0]<stdout>:                                    Parallélisme OpenMP : actif                                     
+[1,0]<stdout>:                              Nombre de processus OpenMP utilisés : 1                               
+[1,1]<stdout>:                                    Parallélisme OpenMP : actif                                     
+[1,1]<stdout>:                              Nombre de processus OpenMP utilisés : 1                               
+[1,1]<stdout>:                               Version de la librairie HDF5 : 1.10.9                                
+[1,0]<stdout>:                               Version de la librairie HDF5 : 1.10.9                                
+[1,1]<stdout>:                                Version de la librairie MED : 4.1.1                                 
+[1,0]<stdout>:                                Version de la librairie MED : 4.1.1                                 
+[1,0]<stdout>:                               Version de la librairie MFront : 4.2.0                               
+[1,1]<stdout>:                               Version de la librairie MFront : 4.2.0                               
+[1,0]<stdout>:                               Version de la librairie MUMPS : 5.6.2                                
+[1,1]<stdout>:                               Version de la librairie MUMPS : 5.6.2                                
+[1,0]<stdout>:                              Version de la librairie PETSc : 3.20.5p0                              
+[1,1]<stdout>:                              Version de la librairie PETSc : 3.20.5p0                              
+[1,1]<stdout>:                               Version de la librairie SCOTCH : 7.0.4                               
+[1,0]<stdout>:                               Version de la librairie SCOTCH : 7.0.4                               
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,1]<stdout>:starting the execution...
+[1,0]<stdout>:starting the execution...
+[1,0]<stdout>:Valeur initiale du temps CPU maximum =   86400 secondes
+[1,0]<stdout>:  Valeur du temps CPU maximum passé aux commandes =   77760 secondes
+[1,0]<stdout>:  Réserve CPU prévue = 8640 secondes
+[1,0]<stdout>:
+[1,1]<stdout>:Valeur initiale du temps CPU maximum =   86400 secondes
+[1,1]<stdout>:  Valeur du temps CPU maximum passé aux commandes =   77760 secondes
+[1,1]<stdout>:  Réserve CPU prévue = 8640 secondes
+[1,1]<stdout>:
+[1,0]<stdout>:Ouverture en écriture du fichier ./glob.1
+[1,0]<stdout>:
+[1,1]<stdout>:Ouverture en écriture du fichier ./glob.1
+[1,1]<stdout>:
+[1,0]<stdout>:Ouverture en écriture du fichier ./vola.1
+[1,0]<stdout>:
+[1,1]<stdout>:Ouverture en écriture du fichier ./vola.1
+[1,1]<stdout>:
+[1,0]<stdout>:Ouverture en lecture du fichier /opt/aster/install/mpi/lib/aster/elem.1
+[1,0]<stdout>:
+[1,0]<stdout>:Nom de la base                          :  ELEMBASE
+[1,0]<stdout>:     Créée avec la version                   :  17.02.04
+[1,0]<stdout>:     Nombre d'enregistrements utilisés       :  45
+[1,0]<stdout>:     Nombre d'enregistrements maximum        :  512
+[1,0]<stdout>:     Nombre d'enregistrements par fichier    :  512
+[1,0]<stdout>:     Longueur d'enregistrement (octets)      :  819200
+[1,0]<stdout>:     Nombre d'identificateurs utilisés       :  123
+[1,0]<stdout>:     Taille maximum du répertoire            :  300
+[1,0]<stdout>:     Pourcentage d'utilisation du répertoire :  41 %
+[1,0]<stdout>:
+[1,1]<stdout>:Ouverture en lecture du fichier /opt/aster/install/mpi/lib/aster/elem.1
+[1,1]<stdout>:
+[1,0]<stdout>:Ouverture en lecture du fichier /opt/aster/install/mpi/lib/aster/elem.1
+[1,0]<stdout>:
+[1,1]<stdout>:Nom de la base                          :  ELEMBASE
+[1,1]<stdout>:     Créée avec la version                   :  17.02.04
+[1,1]<stdout>:     Nombre d'enregistrements utilisés       :  45
+[1,1]<stdout>:     Nombre d'enregistrements maximum        :  512
+[1,1]<stdout>:     Nombre d'enregistrements par fichier    :  512
+[1,1]<stdout>:     Longueur d'enregistrement (octets)      :  819200
+[1,1]<stdout>:     Nombre d'identificateurs utilisés       :  123
+[1,1]<stdout>:     Taille maximum du répertoire            :  300
+[1,1]<stdout>:     Pourcentage d'utilisation du répertoire :  41 %
+[1,1]<stdout>:
+[1,1]<stdout>:Ouverture en lecture du fichier /opt/aster/install/mpi/lib/aster/elem.1
+[1,1]<stdout>:
+[1,1]<stdout>:Nom de la base                          :  ELEMBASE
+[1,1]<stdout>:     Nombre d'enregistrements utilisés       :  45
+[1,1]<stdout>:     Nombre d'enregistrements maximum        :  512
+[1,1]<stdout>:     Nombre d'enregistrements par fichier    :  512
+[1,1]<stdout>:     Longueur d'enregistrement (octets)      :  819200
+[1,1]<stdout>:     Nombre total d'accès en lecture         :  63
+[1,1]<stdout>:     Volume des accès en lecture             :         49.22 Mo.
+[1,1]<stdout>:     Nombre total d'accès en écriture        :  0
+[1,1]<stdout>:     Volume des accès en écriture            :          0.00 Mo.
+[1,1]<stdout>:     Nombre d'identificateurs utilisés       :  123
+[1,1]<stdout>:     Taille maximum du répertoire            :  300
+[1,1]<stdout>:     Pourcentage d'utilisation du répertoire :  41 %
+[1,1]<stdout>:
+[1,0]<stdout>:Nom de la base                          :  ELEMBASE
+[1,0]<stdout>:     Nombre d'enregistrements utilisés       :  45
+[1,0]<stdout>:     Nombre d'enregistrements maximum        :  512
+[1,0]<stdout>:     Nombre d'enregistrements par fichier    :  512
+[1,0]<stdout>:     Longueur d'enregistrement (octets)      :  819200
+[1,0]<stdout>:     Nombre total d'accès en lecture         :  63
+[1,0]<stdout>:     Volume des accès en lecture             :         49.22 Mo.
+[1,0]<stdout>:     Nombre total d'accès en écriture        :  0
+[1,0]<stdout>:     Volume des accès en écriture            :          0.00 Mo.
+[1,0]<stdout>:     Nombre d'identificateurs utilisés       :  123
+[1,0]<stdout>:     Taille maximum du répertoire            :  300
+[1,0]<stdout>:     Pourcentage d'utilisation du répertoire :  41 %
+[1,0]<stdout>:
+[1,1]<stdout>:Relecture des catalogues des éléments faite.
+[1,1]<stdout>:
+[1,0]<stdout>:Relecture des catalogues des éléments faite.
+[1,0]<stdout>:
+[1,0]<stdout>:Fin de lecture (durée  0.015518  s.) 
+[1,0]<stdout>:
+[1,1]<stdout>:Fin de lecture (durée  0.015367  s.) 
+[1,1]<stdout>:
+[1,1]<stdout>:                      Mémoire limite pour l'allocation dynamique : 4215.80 Mo                       
+[1,1]<stdout>:                         ajouté à l'initialisation du processus : 589.50 Mo                         
+[1,1]<stdout>:                               Limite cible du processus : 4805.30 Mo                               
+[1,0]<stdout>:                      Mémoire limite pour l'allocation dynamique : 4215.80 Mo                       
+[1,0]<stdout>:                         ajouté à l'initialisation du processus : 589.50 Mo                         
+[1,0]<stdout>:                               Limite cible du processus : 4805.30 Mo                               
+[1,1]<stdout>:                         Taille limite des fichiers d'échange : 2048.00 Go                          
+[1,0]<stdout>:                         Taille limite des fichiers d'échange : 2048.00 Go                          
+[1,0]<stdout>:# Mémoire (Mo) :   589.50 /   580.49 /   209.22 /   185.03 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Mémoire (Mo) :   589.50 /   580.49 /   209.22 /   185.03 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0001   user+syst:        0.03s (syst:        0.09s, elaps:        0.11s)
+[1,0]<stdout>:# Fin commande #0001   user+syst:        0.03s (syst:        0.09s, elaps:        0.11s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:PETSc initialized...
+[1,1]<stdout>:PETSc initialized...
+[1,0]<stdout>:Nom MED du maillage : PARALLEPIPED
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:------------ MAILLAGE 00000001 - IMPRESSIONS NIVEAU  1 ------------
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE NOEUDS                      274625
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE MAILLES                     287488
+[1,0]<stdout>:                              SEG2                  768
+[1,0]<stdout>:                              QUAD4               24576
+[1,0]<stdout>:                              HEXA8              262144
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE GROUPES DE NOEUDS                8
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE GROUPES DE MAILLES              19
+[1,0]<stdout>:
+[1,0]<stdout>:--------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt190
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0002 de /opt/aster/install/mpi/lib/aster/code_aster/Helpers/LogicalUnit.py, ligne 190
+[1,0]<stdout>:DEFI_FICHIER(ACCES='NEW',
+[1,0]<stdout>:             ACTION='ASSOCIER',
+[1,0]<stdout>:             FICHIER='/tmp/buildCubeu4g48gz9/buildCube.med',
+[1,0]<stdout>:             TYPE='BINARY',
+[1,0]<stdout>:             UNITE=99)
+[1,0]<stdout>:
+[1,0]<stdout>:Deleting '/tmp/buildCubeu4g48gz9/buildCube.med': [1,0]<stdout>:No such file or directory
+[1,0]<stdout>:# Mémoire (Mo) :  1111.05 /   780.56 /   249.04 /   213.86 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0002   user+syst:        0.00s (syst:        0.00s, elaps:        0.00s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:Création du fichier au format MED 3.3.1.
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt190
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0003 de /opt/aster/install/mpi/lib/aster/code_aster/Helpers/LogicalUnit.py, ligne 190
+[1,0]<stdout>:DEFI_FICHIER(ACTION='LIBERER',
+[1,0]<stdout>:             UNITE=99)
+[1,0]<stdout>:
+[1,0]<stdout>:# Mémoire (Mo) :  1111.05 /   780.68 /   282.08 /   250.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0003   user+syst:        0.00s (syst:        0.00s, elaps:        0.01s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:<INFO> Activation du mode parallélisme distribué.
+[1,1]<stdout>:<INFO> Activation du mode parallélisme distribué.
+[1,0]<stdout>:
+[1,0]<stdout>:Nom MED du maillage : 00000001
+[1,0]<stdout>:
+[1,1]<stdout>:Nom MED du maillage : 00000001
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:--------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:--------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:--------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:--------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt282
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt282
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0004 de /opt/aster/install/mpi/lib/aster/code_aster/ObjectsExt/parallelmesh_ext.py,
+[1,0]<stdout>:ligne 282
+[1,1]<stdout>:# Commande #0002 de /opt/aster/install/mpi/lib/aster/code_aster/ObjectsExt/parallelmesh_ext.py,
+[1,1]<stdout>:ligne 282
+[1,0]<stdout>:CREA_MAILLAGE(INFO=1,
+[1,0]<stdout>:              MAILLAGE='<00000002>',
+[1,0]<stdout>:              RAFFINEMENT=_F(NIVEAU=2,
+[1,0]<stdout>:                             TOUT='OUI'))
+[1,0]<stdout>:
+[1,1]<stdout>:CREA_MAILLAGE(INFO=1,
+[1,1]<stdout>:              MAILLAGE='<00000002>',
+[1,1]<stdout>:              RAFFINEMENT=_F(NIVEAU=2,
+[1,1]<stdout>:                             TOUT='OUI'))
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:------------ MAILLAGE 00000004 - IMPRESSIONS NIVEAU  1 ------------
+[1,1]<stdout>:
+[1,1]<stdout>:ASTER 17.02.04 CONCEPT 00000004 CALCULE LE 23/01/2025 A 16:53:41 DE TYPE        
+[1,1]<stdout>:MAILLAGE_P                                                                      
+[1,1]<stdout>:
+[1,1]<stdout>:NOMBRE DE NOEUDS                     8429582
+[1,1]<stdout>:
+[1,1]<stdout>:NOMBRE DE MAILLES                    8494436
+[1,1]<stdout>:                              SEG2                 1536
+[1,1]<stdout>:                              QUAD4              195832
+[1,1]<stdout>:                              HEXA8             8297068
+[1,1]<stdout>:
+[1,1]<stdout>:NOMBRE DE GROUPES DE NOEUDS                4
+[1,1]<stdout>:
+[1,1]<stdout>:NOMBRE DE GROUPES DE MAILLES              14
+[1,1]<stdout>:
+[1,1]<stdout>:--------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      1.00      0.00      1.00
+[1,0]<stdout>:
+[1,0]<stdout>:------------ MAILLAGE 00000004 - IMPRESSIONS NIVEAU  1 ------------
+[1,0]<stdout>:
+[1,0]<stdout>:ASTER 17.02.04 CONCEPT 00000004 CALCULE LE 23/01/2025 A 16:53:41 DE TYPE        
+[1,0]<stdout>:MAILLAGE_P                                                                      
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE NOEUDS                     8681829
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE MAILLES                    8748004
+[1,0]<stdout>:                              SEG2                 1540
+[1,0]<stdout>:                              QUAD4              198432
+[1,0]<stdout>:                              HEXA8             8548032
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE GROUPES DE NOEUDS                4
+[1,0]<stdout>:
+[1,0]<stdout>:NOMBRE DE GROUPES DE MAILLES              14
+[1,0]<stdout>:
+[1,0]<stdout>:--------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,0]<stdout>:#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      0.04      0.00      0.04
+[1,1]<stdout>:# Résultat commande #0002 (CREA_MAILLAGE): '<00000004>' de type <ParallelMesh>
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  5232.90 /  2508.82 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0002   user+syst:      129.98s (syst:       30.43s, elaps:      160.41s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Résultat commande #0004 (CREA_MAILLAGE): '<00000004>' de type <ParallelMesh>
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  5405.25 /  2599.67 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0004   user+syst:      130.69s (syst:       30.46s, elaps:      161.16s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt131
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# Commande #0003 de
+[1,1]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,1]<stdout>:Cube_perf.py, ligne 131
+[1,1]<stdout>:model = AFFE_MODELE(AFFE=_F(MODELISATION='3D',
+[1,1]<stdout>:                            PHENOMENE='MECANIQUE',
+[1,1]<stdout>:                            TOUT='OUI'),
+[1,1]<stdout>:                    DISTRIBUTION=_F(METHODE='CENTRALISE'),
+[1,1]<stdout>:                    INFO=1,
+[1,1]<stdout>:                    MAILLAGE='<00000004>',
+[1,1]<stdout>:                    VERI_JACOBIEN='OUI',
+[1,1]<stdout>:                    VERI_NORM_IFS='OUI',
+[1,1]<stdout>:                    VERI_PLAN='OUI')
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt131
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0005 de
+[1,0]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,0]<stdout>:Cube_perf.py, ligne 131
+[1,0]<stdout>:model = AFFE_MODELE(AFFE=_F(MODELISATION='3D',
+[1,0]<stdout>:                            PHENOMENE='MECANIQUE',
+[1,0]<stdout>:                            TOUT='OUI'),
+[1,0]<stdout>:                    DISTRIBUTION=_F(METHODE='CENTRALISE'),
+[1,0]<stdout>:                    INFO=1,
+[1,0]<stdout>:                    MAILLAGE='<00000004>',
+[1,0]<stdout>:                    VERI_JACOBIEN='OUI',
+[1,0]<stdout>:                    VERI_NORM_IFS='OUI',
+[1,0]<stdout>:                    VERI_PLAN='OUI')
+[1,0]<stdout>:
+[1,1]<stdout>:Sur les 8494436 mailles du maillage 00000004, on a demandé l'affectation de 8494436, on a pu en
+[1,1]<stdout>:affecter 8494436.
+[1,0]<stdout>:Sur les 8748004 mailles du maillage 00000004, on a demandé l'affectation de 8748004, on a pu en
+[1,0]<stdout>:affecter 8748004.
+[1,1]<stdout>:Modélisation     Formulation      Type maille  Élément fini     Nombre
+[1,1]<stdout>:_                _                SEG2         MECA_ARETE2      1536
+[1,1]<stdout>:_                _                QUAD4        MECA_FACE4       195832
+[1,1]<stdout>:3D               _                HEXA8        MECA_HEXA8       8297068
+[1,0]<stdout>:Modélisation     Formulation      Type maille  Élément fini     Nombre
+[1,0]<stdout>:_                _                SEG2         MECA_ARETE2      1540
+[1,0]<stdout>:_                _                QUAD4        MECA_FACE4       198432
+[1,0]<stdout>:3D               _                HEXA8        MECA_HEXA8       8548032
+[1,1]<stdout>:#2      Calculs elementaires et assemblages               CPU (USER+SYST/SYST/ELAPS):      4.53      0.04      4.54
+[1,1]<stdout>:#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      0.03      0.00      0.02
+[1,0]<stdout>:#2      Calculs elementaires et assemblages               CPU (USER+SYST/SYST/ELAPS):      4.84      0.05      4.83
+[1,0]<stdout>:#4      Communications MPI                                CPU (USER+SYST/SYST/ELAPS):      0.00      0.00      0.00
+[1,1]<stdout>:# Résultat commande #0003 (AFFE_MODELE): model ('<00000005>') de type <Model>
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  5845.44 /  2966.17 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0003   user+syst:       29.11s (syst:        0.17s, elaps:       29.29s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Résultat commande #0005 (AFFE_MODELE): model ('<00000005>') de type <Model>
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  5992.59 /  3043.26 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0005   user+syst:       29.07s (syst:        0.19s, elaps:       29.26s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt141
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# Commande #0004 de
+[1,1]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,1]<stdout>:Cube_perf.py, ligne 141
+[1,1]<stdout>:steel = DEFI_MATERIAU(ECRO_LINE=_F(D_SIGM_EPSI=2000.0,
+[1,1]<stdout>:                                   SY=200.0),
+[1,1]<stdout>:                      ELAS=_F(B_ENDOGE=0.0,
+[1,1]<stdout>:                              COEF_AMOR=1.0,
+[1,1]<stdout>:                              E=200000.0,
+[1,1]<stdout>:                              K_DESSIC=0.0,
+[1,1]<stdout>:                              NU=0.3),
+[1,1]<stdout>:                      INFO=1)
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt141
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0006 de
+[1,0]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,0]<stdout>:Cube_perf.py, ligne 141
+[1,0]<stdout>:steel = DEFI_MATERIAU(ECRO_LINE=_F(D_SIGM_EPSI=2000.0,
+[1,0]<stdout>:                                   SY=200.0),
+[1,0]<stdout>:                      ELAS=_F(B_ENDOGE=0.0,
+[1,0]<stdout>:                              COEF_AMOR=1.0,
+[1,0]<stdout>:                              E=200000.0,
+[1,0]<stdout>:                              K_DESSIC=0.0,
+[1,0]<stdout>:                              NU=0.3),
+[1,0]<stdout>:                      INFO=1)
+[1,0]<stdout>:
+[1,1]<stdout>:# Résultat commande #0004 (DEFI_MATERIAU): steel ('<00000006>') de type <Material>
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  5845.44 /  2966.17 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0004   user+syst:        0.02s (syst:        0.00s, elaps:        0.02s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt152
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# Commande #0005 de
+[1,1]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,1]<stdout>:Cube_perf.py, ligne 152
+[1,1]<stdout>:mater = AFFE_MATERIAU(AFFE=_F(MATER=steel,
+[1,1]<stdout>:                              TOUT='OUI'),
+[1,1]<stdout>:                      INFO=1,
+[1,1]<stdout>:                      MAILLAGE='<00000004>')
+[1,1]<stdout>:
+[1,0]<stdout>:# Résultat commande #0006 (DEFI_MATERIAU): steel ('<00000006>') de type <Material>
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  5992.59 /  3043.26 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0006   user+syst:        0.02s (syst:        0.00s, elaps:        0.02s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt152
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0007 de
+[1,0]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,0]<stdout>:Cube_perf.py, ligne 152
+[1,0]<stdout>:mater = AFFE_MATERIAU(AFFE=_F(MATER=steel,
+[1,0]<stdout>:                              TOUT='OUI'),
+[1,0]<stdout>:                      INFO=1,
+[1,0]<stdout>:                      MAILLAGE='<00000004>')
+[1,0]<stdout>:
+[1,1]<stdout>:# Résultat commande #0005 (AFFE_MATERIAU): mater ('<00000007>') de type <MaterialField>
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  5845.44 /  2966.17 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0005   user+syst:        0.01s (syst:        0.00s, elaps:        0.01s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt161
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# Commande #0006 de
+[1,1]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,1]<stdout>:Cube_perf.py, ligne 161
+[1,1]<stdout>:block = AFFE_CHAR_CINE(INFO=1,
+[1,1]<stdout>:                       MECA_IMPO=_F(DX=0,
+[1,1]<stdout>:                                    DY=0.0,
+[1,1]<stdout>:                                    DZ=0.0,
+[1,1]<stdout>:                                    GROUP_MA='LEFT'),
+[1,1]<stdout>:                       MODELE=model,
+[1,1]<stdout>:                       SYNTAXE='NON')
+[1,1]<stdout>:
+[1,0]<stdout>:# Résultat commande #0007 (AFFE_MATERIAU): mater ('<00000007>') de type <MaterialField>
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  5992.59 /  3043.26 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0007   user+syst:        0.02s (syst:        0.00s, elaps:        0.02s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt161
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0008 de
+[1,0]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,0]<stdout>:Cube_perf.py, ligne 161
+[1,0]<stdout>:block = AFFE_CHAR_CINE(INFO=1,
+[1,0]<stdout>:                       MECA_IMPO=_F(DX=0,
+[1,0]<stdout>:                                    DY=0.0,
+[1,0]<stdout>:                                    DZ=0.0,
+[1,0]<stdout>:                                    GROUP_MA='LEFT'),
+[1,0]<stdout>:                       MODELE=model,
+[1,0]<stdout>:                       SYNTAXE='NON')
+[1,0]<stdout>:
+[1,1]<stdout>:# Résultat commande #0006 (AFFE_CHAR_CINE): block ('<00000008>') de type <MechanicalDirichletBC>
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  5845.44 /  2966.17 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0006   user+syst:        4.18s (syst:        0.00s, elaps:        4.18s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt173
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# Commande #0007 de
+[1,1]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,1]<stdout>:Cube_perf.py, ligne 173
+[1,1]<stdout>:imposed_displ = AFFE_CHAR_CINE(INFO=1,
+[1,1]<stdout>:                               MECA_IMPO=_F(DY=0.001,
+[1,1]<stdout>:                                            DZ=0.001,
+[1,1]<stdout>:                                            GROUP_MA='RIGHT'),
+[1,1]<stdout>:                               MODELE=model,
+[1,1]<stdout>:                               SYNTAXE='NON')
+[1,1]<stdout>:
+[1,0]<stdout>:# Résultat commande #0008 (AFFE_CHAR_CINE): block ('<00000008>') de type <MechanicalDirichletBC>
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  5992.59 /  3043.26 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0008   user+syst:        4.27s (syst:        0.00s, elaps:        4.27s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt173
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0009 de
+[1,0]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,0]<stdout>:Cube_perf.py, ligne 173
+[1,0]<stdout>:imposed_displ = AFFE_CHAR_CINE(INFO=1,
+[1,0]<stdout>:                               MECA_IMPO=_F(DY=0.001,
+[1,0]<stdout>:                                            DZ=0.001,
+[1,0]<stdout>:                                            GROUP_MA='RIGHT'),
+[1,0]<stdout>:                               MODELE=model,
+[1,0]<stdout>:                               SYNTAXE='NON')
+[1,0]<stdout>:
+[1,1]<stdout>:# Résultat commande #0007 (AFFE_CHAR_CINE): imposed_displ ('<00000009>') de type
+[1,1]<stdout>:<MechanicalDirichletBC>
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  5845.44 /  2966.17 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0007   user+syst:        4.26s (syst:        0.00s, elaps:        4.26s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:
+[1,1]<stdout>:.. _stg1_txt185
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:# Commande #0008 de
+[1,1]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,1]<stdout>:Cube_perf.py, ligne 185
+[1,1]<stdout>:stiff_elem = CALC_MATR_ELEM(CALC_ELEM_MODELE='OUI',
+[1,1]<stdout>:                            CHAM_MATER=mater,
+[1,1]<stdout>:                            INST=0.0,
+[1,1]<stdout>:                            MODELE=model,
+[1,1]<stdout>:                            MODE_FOURIER=0,
+[1,1]<stdout>:                            OPTION='RIGI_MECA')
+[1,1]<stdout>:
+[1,0]<stdout>:# Résultat commande #0009 (AFFE_CHAR_CINE): imposed_displ ('<00000009>') de type
+[1,0]<stdout>:<MechanicalDirichletBC>
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  5992.59 /  3043.26 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0009   user+syst:        4.28s (syst:        0.00s, elaps:        4.28s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:
+[1,0]<stdout>:.. _stg1_txt185
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:# Commande #0010 de
+[1,0]<stdout>:/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/
+[1,0]<stdout>:Cube_perf.py, ligne 185
+[1,0]<stdout>:stiff_elem = CALC_MATR_ELEM(CALC_ELEM_MODELE='OUI',
+[1,0]<stdout>:                            CHAM_MATER=mater,
+[1,0]<stdout>:                            INST=0.0,
+[1,0]<stdout>:                            MODELE=model,
+[1,0]<stdout>:                            MODE_FOURIER=0,
+[1,0]<stdout>:                            OPTION='RIGI_MECA')
+[1,0]<stdout>:
+[1,1]<stdout>:La mémoire consommée actuellement hors JEVEUX est de 2982.49 Mo.
+[1,1]<stdout>:La mémoire limite pour l'allocation dynamique est fixée à 1822.81 Mo (-2393.00 Mo).
+[1,1]<stdout>:Cette valeur limite a été réactualisée lors de la mise en oeuvre d'un processus de libération.
+[1,1]<stdout>:
+[1,0]<stdout>:La mémoire consommée actuellement hors JEVEUX est de 3360.55 Mo.
+[1,0]<stdout>:La mémoire limite pour l'allocation dynamique est fixée à 1444.75 Mo (-2824.95 Mo).
+[1,0]<stdout>:Cette valeur limite a été réactualisée lors de la mise en oeuvre d'un processus de libération.
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>: ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+[1,0]<stdout>: ║ <EXCEPTION> <JEVEUX_40>                                                                        ║
+[1,0]<stdout>: ║                                                                                                ║
+[1,0]<stdout>: ║ Erreur écriture de l'enregistrement 10563 sur la base : GLOBALE 0                              ║
+[1,0]<stdout>: ║      code retour : -4                                                                          ║
+[1,0]<stdout>: ║      Erreur probablement provoquée par une taille trop faible du répertoire de travail.        ║
+[1,0]<stdout>: ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+[1,0]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>: ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+[1,1]<stdout>: ║ <EXCEPTION> <JEVEUX_40>                                                                        ║
+[1,1]<stdout>: ║                                                                                                ║
+[1,1]<stdout>: ║ Erreur écriture de l'enregistrement 9177 sur la base : GLOBALE 0                               ║
+[1,1]<stdout>: ║      code retour : -4                                                                          ║
+[1,1]<stdout>: ║      Erreur probablement provoquée par une taille trop faible du répertoire de travail.        ║
+[1,1]<stdout>: ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+[1,1]<stdout>:
+[1,1]<stdout>:On signale au processeur #0 qu'une exception a été levée.
+[1,0]<stdout>:Le processeur #1 a émis un message d'erreur.
+[1,0]<stdout>:Le processeur #0 a émis un message d'erreur.
+[1,0]<stdout>:On demande au processeur #1 de s'arrêter ou de lever une exception.
+[1,0]<stdout>:# Mémoire (Mo) : 48925.52 /  4638.07 /  4269.00 /  2490.98 (VmPeak / VmSize / Optimum / Minimum)
+[1,0]<stdout>:# Fin commande #0010   user+syst:       25.76s (syst:        2.70s, elaps:      145.98s)
+[1,0]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,0]<stdout>:Traceback (most recent call last):
+[1,0]<stdout>:  File "<frozen runpy>", line 198, in _run_module_as_main
+[1,0]<stdout>:  File "<frozen runpy>", line 88, in _run_code
+[1,0]<stdout>:  File "/opt/venv/lib/python3.11/site-packages/mpi4py/__main__.py", line 7, in <module>
+[1,0]<stdout>:    main()
+[1,0]<stdout>:  File "/opt/venv/lib/python3.11/site-packages/mpi4py/run.py", line 230, in main
+[1,0]<stdout>:    run_command_line(args)
+[1,0]<stdout>:  File "/opt/venv/lib/python3.11/site-packages/mpi4py/run.py", line 47, in run_command_line
+[1,0]<stdout>:    run_path(sys.argv[0], run_name='__main__')
+[1,0]<stdout>:  File "<frozen runpy>", line 291, in run_path
+[1,0]<stdout>:  File "<frozen runpy>", line 98, in _run_module_code
+[1,0]<stdout>:  File "<frozen runpy>", line 88, in _run_code
+[1,0]<stdout>:  File "/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/Cube_perf.py", line 185, in <module>
+[1,0]<stdout>:    stiff_elem = CALC_MATR_ELEM(
+[1,0]<stdout>:                 ^^^^^^^^^^^^^^^
+[1,0]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Supervis/ExecuteCommand.py", line 180, in run
+[1,0]<stdout>:    return cmd.run_(**kwargs)
+[1,0]<stdout>:           ^^^^^^^^^^^^^^^^^^
+[1,0]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Supervis/ExecuteCommand.py", line 223, in run_
+[1,0]<stdout>:    self.exec_(keywords)
+[1,0]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Supervis/ExecuteCommand.py", line 711, in exec_
+[1,0]<stdout>:    output = self._op(self, **keywords)
+[1,0]<stdout>:             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+[1,0]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/MacroCommands/calc_matr_elem_ops.py", line 69, in calc_matr_elem_ops
+[1,0]<stdout>:    matr_elem = disc_comp.getLinearStiffnessMatrix(time, fourier, varc, group_ma)
+[1,0]<stdout>:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[1,0]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Utilities/statistics_manager.py", line 54, in wrapper
+[1,0]<stdout>:    result = func(*args, **kwargs)
+[1,0]<stdout>:             ^^^^^^^^^^^^^^^^^^^^^
+[1,0]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/ObjectsExt/discretecomputation_ext.py", line 106, in getLinearStiffnessMatrix
+[1,0]<stdout>:    matr_elem = self.getElasticStiffnessMatrix(
+[1,0]<stdout>:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[1,0]<stdout>:libaster.AsterError: 
+[1,0]<stdout>: ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+[1,0]<stdout>: ║ <EXCEPTION> <JEVEUX_40>                                                                        ║
+[1,0]<stdout>: ║                                                                                                ║
+[1,0]<stdout>: ║ Erreur écriture de l'enregistrement 10563 sur la base : GLOBALE 0                              ║
+[1,0]<stdout>: ║      code retour : -4                                                                          ║
+[1,0]<stdout>: ║      Erreur probablement provoquée par une taille trop faible du répertoire de travail.        ║
+[1,0]<stdout>: ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:Exception: Trying to close the database after an uncaught exception...
+[1,0]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>:Publishing the result of the current command CALC_MATR_ELEM...
+[1,0]<stdout>:
+[1,1]<stdout>:# Mémoire (Mo) : 48583.29 /  4228.66 /  4213.75 /  2410.55 (VmPeak / VmSize / Optimum / Minimum)
+[1,1]<stdout>:# Fin commande #0008   user+syst:       22.09s (syst:        2.99s, elaps:      146.10s)
+[1,1]<stdout>:# ----------------------------------------------------------------------------------------------
+[1,1]<stdout>:Traceback (most recent call last):
+[1,1]<stdout>:  File "<frozen runpy>", line 198, in _run_module_as_main
+[1,1]<stdout>:  File "<frozen runpy>", line 88, in _run_code
+[1,1]<stdout>:  File "/opt/venv/lib/python3.11/site-packages/mpi4py/__main__.py", line 7, in <module>
+[1,1]<stdout>:    main()
+[1,1]<stdout>:  File "/opt/venv/lib/python3.11/site-packages/mpi4py/run.py", line 230, in main
+[1,1]<stdout>:    run_command_line(args)
+[1,1]<stdout>:  File "/opt/venv/lib/python3.11/site-packages/mpi4py/run.py", line 47, in run_command_line
+[1,1]<stdout>:    run_path(sys.argv[0], run_name='__main__')
+[1,1]<stdout>:  File "<frozen runpy>", line 291, in run_path
+[1,1]<stdout>:  File "<frozen runpy>", line 98, in _run_module_code
+[1,1]<stdout>:  File "<frozen runpy>", line 88, in _run_code
+[1,1]<stdout>:  File "/home/aster/work/Benchmark-CodeAster/opensource-installation-development-main/benchmarks/Cube_files/Cube_perf.py", line 185, in <module>
+[1,1]<stdout>:    stiff_elem = CALC_MATR_ELEM(
+[1,1]<stdout>:                 ^^^^^^^^^^^^^^^
+[1,1]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Supervis/ExecuteCommand.py", line 180, in run
+[1,1]<stdout>:    return cmd.run_(**kwargs)
+[1,1]<stdout>:           ^^^^^^^^^^^^^^^^^^
+[1,1]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Supervis/ExecuteCommand.py", line 223, in run_
+[1,1]<stdout>:    self.exec_(keywords)
+[1,1]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Supervis/ExecuteCommand.py", line 711, in exec_
+[1,1]<stdout>:    output = self._op(self, **keywords)
+[1,1]<stdout>:             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+[1,1]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/MacroCommands/calc_matr_elem_ops.py", line 69, in calc_matr_elem_ops
+[1,1]<stdout>:    matr_elem = disc_comp.getLinearStiffnessMatrix(time, fourier, varc, group_ma)
+[1,1]<stdout>:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[1,1]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/Utilities/statistics_manager.py", line 54, in wrapper
+[1,1]<stdout>:    result = func(*args, **kwargs)
+[1,1]<stdout>:             ^^^^^^^^^^^^^^^^^^^^^
+[1,1]<stdout>:  File "/opt/aster/install/mpi/lib/aster/code_aster/ObjectsExt/discretecomputation_ext.py", line 106, in getLinearStiffnessMatrix
+[1,1]<stdout>:    matr_elem = self.getElasticStiffnessMatrix(
+[1,1]<stdout>:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[1,1]<stdout>:libaster.AsterError: 
+[1,1]<stdout>: ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+[1,1]<stdout>: ║ <EXCEPTION> <JEVEUX_40>                                                                        ║
+[1,1]<stdout>: ║                                                                                                ║
+[1,1]<stdout>: ║ Erreur écriture de l'enregistrement 9177 sur la base : GLOBALE 0                               ║
+[1,1]<stdout>: ║      code retour : -4                                                                          ║
+[1,1]<stdout>: ║      Erreur probablement provoquée par une taille trop faible du répertoire de travail.        ║
+[1,1]<stdout>: ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:Exception: Trying to close the database after an uncaught exception...
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:Publishing the result of the current command CALC_MATR_ELEM...
+[1,1]<stdout>:
+[1,0]<stdout>:No database in results, objects not saved on processor #0
+[1,1]<stdout>:No database in results, objects not saved on processor #1
+[1,1]<stdout>:
+[1,1]<stdout>: ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+[1,1]<stdout>: ║ <I> <CATAMESS_89>                                                                              ║
+[1,1]<stdout>: ║                                                                                                ║
+[1,1]<stdout>: ║ Liste des alarmes émises lors de l'exécution du calcul.                                        ║
+[1,1]<stdout>: ║                                                                                                ║
+[1,1]<stdout>: ║     Les alarmes que vous avez choisies d'ignorer sont précédées de (*).                        ║
+[1,1]<stdout>: ║     Nombre d'occurrences pour chacune des alarmes :                                            ║
+[1,1]<stdout>: ║            aucune alarme                                                                       ║
+[1,1]<stdout>: ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+[1,1]<stdout>:
+[1,0]<stdout>:
+[1,0]<stdout>: ╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+[1,0]<stdout>: ║ <I> <CATAMESS_89>                                                                              ║
+[1,0]<stdout>: ║                                                                                                ║
+[1,0]<stdout>: ║ Liste des alarmes émises lors de l'exécution du calcul.                                        ║
+[1,0]<stdout>: ║                                                                                                ║
+[1,0]<stdout>: ║     Les alarmes que vous avez choisies d'ignorer sont précédées de (*).                        ║
+[1,0]<stdout>: ║     Nombre d'occurrences pour chacune des alarmes :                                            ║
+[1,0]<stdout>: ║            aucune alarme                                                                       ║
+[1,0]<stdout>: ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
+[1,0]<stdout>:
+[1,1]<stdout>:<I> <FIN> ARRET NORMAL DANS "FIN" PAR APPEL A "JEFINI".
+[1,0]<stdout>:<I> <FIN> ARRET NORMAL DANS "FIN" PAR APPEL A "JEFINI".
+[1,1]<stdout>:  
+[1,0]<stdout>:  
+[1,1]<stdout>: <I> <FIN> MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :                    2410.55 Mo
+[1,0]<stdout>: <I> <FIN> MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :                    2490.98 Mo
+[1,0]<stdout>: <I> <FIN> MEMOIRE JEVEUX OPTIMALE REQUISE POUR L'EXECUTION :                    4269.00 Mo
+[1,0]<stdout>: <I> <FIN> MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS LORS DE L'EXECUTION :   48925.52 Mo
+[1,1]<stdout>: <I> <FIN> MEMOIRE JEVEUX OPTIMALE REQUISE POUR L'EXECUTION :                    4213.75 Mo
+[1,1]<stdout>: <I> <FIN> MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS LORS DE L'EXECUTION :   48583.29 Mo
+[1,0]<stdout>:  
+[1,1]<stdout>:  
+[1,0]<stdout>: <I>       FERMETURE DES BASES EFFECTUEE
+[1,1]<stdout>: <I>       FERMETURE DES BASES EFFECTUEE
+[1,0]<stdout>:  
+[1,1]<stdout>:  
+[1,0]<stdout>:   STATISTIQUES CONCERNANT L'ALLOCATION DYNAMIQUE :
+[1,1]<stdout>:   STATISTIQUES CONCERNANT L'ALLOCATION DYNAMIQUE :
+[1,0]<stdout>:     TAILLE CUMULEE MAXIMUM            :                 4269  Mo.
+[1,1]<stdout>:     TAILLE CUMULEE MAXIMUM            :                 4214  Mo.
+[1,0]<stdout>:     TAILLE CUMULEE LIBEREE            :                11292  Mo.
+[1,1]<stdout>:     TAILLE CUMULEE LIBEREE            :                10582  Mo.
+[1,1]<stdout>:     NOMBRE TOTAL D'ALLOCATIONS        :             91776592
+[1,0]<stdout>:     NOMBRE TOTAL D'ALLOCATIONS        :             97244432
+[1,1]<stdout>:     NOMBRE TOTAL DE LIBERATIONS       :             91776388
+[1,0]<stdout>:     NOMBRE TOTAL DE LIBERATIONS       :             97244228
+[1,1]<stdout>:     APPELS AU MECANISME DE LIBERATION :                   16
+[1,0]<stdout>:     APPELS AU MECANISME DE LIBERATION :                   62
+[1,1]<stdout>:     TAILLE MEMOIRE CUMULEE RECUPEREE  :                 6411  Mo.
+[1,0]<stdout>:     TAILLE MEMOIRE CUMULEE RECUPEREE  :                 7834  Mo.
+[1,1]<stdout>:     VOLUME DES LECTURES               :                    0  Mo.
+[1,0]<stdout>:     VOLUME DES LECTURES               :                    0  Mo.
+[1,1]<stdout>:     VOLUME DES ECRITURES              :                 6543  Mo.
+[1,0]<stdout>:     VOLUME DES ECRITURES              :                 7999  Mo.
+[1,1]<stdout>:  
+[1,0]<stdout>:  
+[1,1]<stdout>:   MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :    2410.55 Mo
+[1,0]<stdout>:   MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :    2490.98 Mo
+[1,0]<stdout>:     - IMPOSE DE NOMBREUX ACCES DISQUE
+[1,1]<stdout>:     - IMPOSE DE NOMBREUX ACCES DISQUE
+[1,0]<stdout>:     - RALENTIT LA VITESSE D'EXECUTION
+[1,1]<stdout>:     - RALENTIT LA VITESSE D'EXECUTION
+[1,0]<stdout>:   MEMOIRE JEVEUX OPTIMALE REQUISE POUR L'EXECUTION :    4269.00 Mo
+[1,1]<stdout>:   MEMOIRE JEVEUX OPTIMALE REQUISE POUR L'EXECUTION :    4213.75 Mo
+[1,1]<stdout>:     - LIMITE LES ACCES DISQUE
+[1,0]<stdout>:     - LIMITE LES ACCES DISQUE
+[1,1]<stdout>:     - AMELIORE LA VITESSE D'EXECUTION
+[1,0]<stdout>:     - AMELIORE LA VITESSE D'EXECUTION
+[1,0]<stdout>:   MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS     :   48925.52 Mo
+[1,1]<stdout>:   MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS     :   48583.29 Mo
+[1,0]<stdout>:     - COMPREND LA MEMOIRE CONSOMMEE PAR  JEVEUX, 
+[1,1]<stdout>:     - COMPREND LA MEMOIRE CONSOMMEE PAR  JEVEUX, 
+[1,0]<stdout>:       LE SUPERVISEUR PYTHON, LES LIBRAIRIES EXTERNES
+[1,1]<stdout>:       LE SUPERVISEUR PYTHON, LES LIBRAIRIES EXTERNES
+[1,1]<stdout>:  
+[1,0]<stdout>:  
+[1,1]<stdout>: <I>       FIN D'EXECUTION LE : JE-23-JANV-2025 16:57:03
+[1,0]<stdout>: <I>       FIN D'EXECUTION LE : JE-23-JANV-2025 16:57:03
+[1,1]<stdout>:INFO './glob.1' deleted
+[1,0]<stdout>:INFO './glob.1' deleted
+[1,0]<stdout>:Deleting './glob.2': [1,1]<stdout>:Deleting './glob.2': [1,0]<stdout>:No such file or directory
+[1,1]<stdout>:No such file or directory
+[1,0]<stdout>:INFO './vola.1' deleted
+[1,0]<stdout>:Deleting './vola.2': [1,1]<stdout>:INFO './vola.1' deleted
+[1,0]<stdout>:No such file or directory
+[1,1]<stdout>:Deleting './vola.2': [1,1]<stdout>:No such file or directory
+[1,1]<stdout>:
+[1,1]<stdout>:EXECUTION_CODE_ASTER_EXIT_2289=1
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:execution ended (command file #1): <S>_ERROR
+[1,1]<stdout>:
+[1,1]<stdout>:# ------------------------------------------------------------------------------
+[1,1]<stdout>:Content of /tmp/run_aster_ugwvoxmg/proc.1 after execution:
+[1,1]<stdout>:.:
+[1,1]<stdout>:total 28
+[1,1]<stdout>:-rw-r--r-- 1 aster aster   201 Jan 23 16:51 2289.export
+[1,1]<stdout>:drwxr-xr-x 2 aster aster     6 Jan 23 16:51 REPE_IN
+[1,1]<stdout>:drwxr-xr-x 2 aster aster     6 Jan 23 16:51 REPE_OUT
+[1,1]<stdout>:-rw-r--r-- 1 aster aster 20626 Jan 23 16:57 fort.6
+[1,1]<stdout>:-rw-r--r-- 1 aster aster     0 Jan 23 16:51 fort.8
+[1,1]<stdout>:-rw-r--r-- 1 aster aster     0 Jan 23 16:51 fort.9
+[1,1]<stdout>:
+[1,1]<stdout>:REPE_OUT:
+[1,1]<stdout>:total 0
+[1,1]<stdout>:
+[1,1]<stdout>:
+[1,1]<stdout>:# ------------------------------------------------------------------------------
+[1,1]<stdout>:Execution summary
+[1,1]<stdout>:                                      cpu     system    cpu+sys    elapsed
+[1,1]<stdout>:--------------------------------------------------------------------------------
+[1,1]<stdout>:Preparation of environment           0.00       0.00       0.00       0.00
+[1,1]<stdout>:Execution of code_aster            198.88      35.23     234.11     355.15
+[1,1]<stdout>:Copying results                      0.00       0.00       0.00       0.00
+[1,1]<stdout>:--------------------------------------------------------------------------------
+[1,1]<stdout>:Total                              198.88      35.23     234.11     355.15
+[1,1]<stdout>:--------------------------------------------------------------------------------

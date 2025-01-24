@@ -1,0 +1,14 @@
+block_id;module;source_info;time_p;time_s;time_s_min;time_s_avg;time_s_max;cov_deviation;time_deviation;nb_threads;flops;
+208;BSM_2;simd_builtin.h:1548-1548,simd_builtin.h:1558-1558,cmath:182-182,cmath:377-377,simd.h:2857-2857,normal_distribution.hpp:163-163;24.680019378662;11.28000164032;;;;;;;;
+202;BSM_2;cmath:182-182;5.633957862854;2.5750000476837;;;;;;;;
+209;BSM_2;BSM.cxx:164-165,BSM.cxx:192-192,simd_builtin.h:1548-1558,simd_builtin.h:1660-1660,cmath:377-377,simd.h:2110-2110;1.5862599611282;0.72500002384186;;;;;;;;
+199;BSM_2;XoshiroCpp.hpp:667-667,XoshiroCpp.hpp:840-846,uniform_01.hpp:98-98;1.4221640825272;0.65000003576279;;;;;;;;
+197;BSM_2;XoshiroCpp.hpp:667-667,XoshiroCpp.hpp:840-846,uniform_01.hpp:98-98;1.159610748291;0.53000003099442;;;;;;;;
+205;BSM_2;XoshiroCpp.hpp:667-667,XoshiroCpp.hpp:840-846,uniform_01.hpp:98-98;1.1158518791199;0.5100000500679;;;;;;;;
+203;BSM_2;XoshiroCpp.hpp:667-667,XoshiroCpp.hpp:840-846,uniform_01.hpp:98-98;1.0392737388611;0.47500002384186;;;;;;;;
+207;BSM_2;cmath:182-182,cmath:443-443,normal_distribution.hpp:155-155,normal_distribution.hpp:164-164;0.74390119314194;0.33999997377396;;;;;;;;
+206;BSM_2;cmath:327-327,normal_distribution.hpp:155-155,normal_distribution.hpp:163-163;0.52510672807693;0.23999999463558;;;;;;;;
+201;BSM_2;cmath:182-182,normal_distribution.hpp:155-155,normal_distribution.hpp:164-164;0.50322729349136;0.23000000417233;;;;;;;;
+200;BSM_2;cmath:327-327,normal_distribution.hpp:155-155;0.41570949554443;0.18999999761581;;;;;;;;
+204;BSM_2;cmath:443-443;0.3500711619854;0.16000001132488;;;;;;;;
+198;BSM_2;uniform_01.hpp:98-98;0.22973419725895;0.10500000417233;;;;;;;;

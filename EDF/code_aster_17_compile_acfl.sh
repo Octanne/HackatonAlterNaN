@@ -8,7 +8,7 @@ WRKDIR=${COMPILE_ROOT}/codeaster-prerequisites-${VERSION_CAS}-oss
 PYVENV_CAS=${COMPILE_ROOT}/venv
 PYTHON39=${HOME}/modules_locales/python-build/python39
 ACFL_TO_GCC_LINK=${COMPILE_ROOT}/acfl_bin
-ACFL_DIR=/tools/acfl/24.04/arm-linux-compiler-24.04_AmazonLinux-2
+ACFL_DIR=/tools/acfl/24.10/arm-linux-compiler-24.04_AmazonLinux-2
 MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
 
 # Install boost root 
@@ -18,7 +18,7 @@ MPI_DIR=/tools/openmpi/4.1.7/acfl/24.04
 #  ./bootstrap.sh --prefix=${HOME}/boost-build -with-libraries=python,filesystem,regex,system,thread,date_time,chrono,serialization --with-python=python3.9
 #  ./b2 python=3.9 include=${HOME}/python-build/python39/include/python3.9 library-path=${HOME}/python-build/python39/lib/python3.9 --prefix=${HOME}/boost-build
 #  ./b2 install -j6 --prefix=${HOME}/boost-build
-export BOOST_ROOT=${HOME}/boost-build
+#export BOOST_ROOT=${HOME}/boost-build
 
 # Install metis 5
 # wget https://github.com/KarypisLab/METIS/archive/refs/tags/v5.1.1-DistDGL-v0.5.tar.gz
@@ -71,8 +71,9 @@ module unuse ${HOME}/modules_locales/modulefiles
 module use /tools/acfl/24.04/modulefiles
 module use ${HOME}/modules_locales/modulefiles
 module load acfl/24.04
-module load openblas/24.04
-module load openmpi/4.1.7
+module load acfl-24.04/openblas/r0.3.20
+module load acfl-24.04/openmpi/4.1.7
+module load acfl-24.04/boost-libs/1.73.0
 module load python/3.9
 module load cmake/3.31.4
 
@@ -123,6 +124,6 @@ fi
 # /fsx/home/etud2-2/ACFL_CodeAster/codeaster-prerequisites-20240327-oss/.venv_petsc/bin/python3 -m pip install numpy
 
 echo "Do those command to continue : 
-#make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 check
-#make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0 setup_venv
-#make ROOT=${INSTALL_DIR} ARCH=gcc13-openblas-ompi4 RESTRICTED=0"
+#make ROOT=${INSTALL_DIR} ARCH=acfl24-openblas-ompi4 RESTRICTED=0 check
+#make ROOT=${INSTALL_DIR} ARCH=acfl24-openblas-ompi4 RESTRICTED=0 setup_venv
+#make ROOT=${INSTALL_DIR} ARCH=acfl24-openblas-ompi4 RESTRICTED=0"

@@ -1,0 +1,257 @@
+{
+  "_cqa_uarch_const":
+    {
+      "uop cache capacity": 2000,
+      "Is supported by UFS": false,
+      "nb simple decoders": 6,
+      "UQ throughput": 8,
+      "vector-unaligned optimal pattern": "1x128",
+      "ports":
+        [
+          {
+            "name": "BRANCH-0",
+            "units":
+              {
+                "BRU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "BRANCH-1",
+            "units":
+              {
+                "BRU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "ALU-SC-0",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "ALU-SC-1",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "ALU-SC-2",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "ALU-SC-3",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "ALU-MC-0",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "name": "ALU-MC-1",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 128,
+            "name": "VPU/FP-0",
+            "units":
+              {
+                "VPU":
+                  {
+                    "FMA": true,
+                    "FMUL": true,
+                    "FADD": true,
+                    "merged_with":
+                      {
+                        "unit": "VPU",
+                        "port": 11
+                      }
+                  },
+                "FP store data":
+                  [
+
+                  ],
+                "ALU":
+                  [
+
+                  ],
+                "DIV/SQRT":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 128,
+            "name": "VPU/FP-1",
+            "units":
+              {
+                "VPU":
+                  {
+                    "FMA": true,
+                    "FMUL": true,
+                    "FADD": true,
+                    "merged_with":
+                      {
+                        "unit": "VPU",
+                        "port": 12
+                      }
+                  },
+                "ALU":
+                  [
+
+                  ],
+                "FP store data":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 128,
+            "name": "VPU/FP-2",
+            "units":
+              {
+                "VPU":
+                  {
+                    "FMA": true,
+                    "FMUL": true,
+                    "FADD": true
+                  },
+                "ALU":
+                  [
+
+                  ],
+                "DIV/SQRT":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 128,
+            "name": "VPU/FP-3",
+            "units":
+              {
+                "ALU":
+                  [
+
+                  ],
+                "VPU":
+                  {
+                    "FMA": true,
+                    "FMUL": true,
+                    "FADD": true
+                  }
+              }
+          },
+          {
+            "width": 256,
+            "name": "LD/STA-0",
+            "units":
+              {
+                "store address":
+                  [
+
+                  ],
+                "load":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 256,
+            "name": "LD/STA-1",
+            "units":
+              {
+                "store address":
+                  [
+
+                  ],
+                "load":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 256,
+            "name": "LD-2",
+            "units":
+              {
+                "load":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 64,
+            "name": "STD-0",
+            "units":
+              {
+                "store data":
+                  [
+
+                  ]
+              }
+          },
+          {
+            "width": 64,
+            "name": "STD-1",
+            "units":
+              {
+                "store data":
+                  [
+
+                  ]
+              }
+          }
+        ],
+      "vector size in bytes": 16,
+      "IQ throughput": 8,
+      "INT vector size in bytes": 16,
+      "bytes fetched per cycle": 32,
+      "retire throughput": 8,
+      "nb execution ports": 17,
+      "nb complex decoders": 0
+    }
+}

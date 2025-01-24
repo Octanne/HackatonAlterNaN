@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=BSM_2
-#SBATCH --output=results_benchmark/C8G/results/BSM_2_output.txt
+#SBATCH --output=results_benchmark/C7G/results/BSM_2_output.txt
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --time=10:00:00

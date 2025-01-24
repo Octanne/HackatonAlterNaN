@@ -1,0 +1,112 @@
+address;source_location;insn;indent
+0x27a0;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X22, X26;
+0x27a4;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:842;EOR	X9, X22, X23;
+0x27a8;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:843;EOR	X10, X26, X25;
+0x27ac;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X8, X8, X8, #41;
+0x27b0;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:846;EOR	X23, X9, X25,LSL #17;
+0x27b4;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:844;EOR	X25, X9, X25;
+0x27b8;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X26, X10, X10, #19;
+0x27bc;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X8, X22;
+0x27c0;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:845;EOR	X22, X10, X22;
+0x27c4;/usr/include/boost/random/uniform_01.hpp:98;UCVTF	S12, X8, #64;
+0x27c8;/usr/include/boost/random/uniform_01.hpp:98;FCMP	S12, S9;
+0x27cc;/usr/include/boost/random/uniform_01.hpp:98;B.PL	27a0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x260>;
+0x27d0;/usr/include/boost/random/uniform_01.hpp:98;HINT	#0;
+0x27d4;/usr/include/boost/random/uniform_01.hpp:98;HINT	#0;
+0x27d8;/usr/include/boost/random/uniform_01.hpp:98;HINT	#0;
+0x27dc;/usr/include/boost/random/uniform_01.hpp:98;HINT	#0;
+0x27e0;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X22, X26;  (5) 
+0x27e4;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:842;EOR	X9, X22, X23;  (5) 
+0x27e8;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:843;EOR	X10, X26, X25;  (5) 
+0x27ec;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X8, X8, X8, #41;  (5) 
+0x27f0;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:846;EOR	X23, X9, X25,LSL #17;  (5) 
+0x27f4;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:844;EOR	X25, X9, X25;  (5) 
+0x27f8;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X26, X10, X10, #19;  (5) 
+0x27fc;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X8, X22;  (5) 
+0x2800;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:845;EOR	X22, X10, X22;  (5) 
+0x2804;/usr/include/boost/random/uniform_01.hpp:98;UCVTF	S0, X8, #64;  (5) 
+0x2808;/usr/include/boost/random/uniform_01.hpp:98;FCMP	S0, S9;  (5) 
+0x280c;/usr/include/boost/random/uniform_01.hpp:98;B.PL	27e0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x2a0>;  (5) 
+0x2810;/usr/include/boost/random/normal_distribution.hpp:155;FSUB	S0, S9, S0;
+0x2814;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:327;BL	16d0 <@plt_start@+0x50>;
+0x2818;/usr/include/boost/random/normal_distribution.hpp:155;FMUL	S13, S0, S10;
+0x281c;/usr/include/boost/random/normal_distribution.hpp:164;FMUL	S0, S12, S11;
+0x2820;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;ADD	X0, SP, #164;
+0x2824;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;ADD	X1, SP, #160;
+0x2828;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;BL	1790 <@plt_start@+0x110>;
+0x282c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;LDP	S2, S0, [SP, #160];
+0x2830;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;HINT	#0;
+0x2834;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;HINT	#0;
+0x2838;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;HINT	#0;
+0x283c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;HINT	#0;
+0x2840;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X22, X26;  (6) 
+0x2844;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:842;EOR	X9, X22, X23;  (6) 
+0x2848;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:843;EOR	X10, X26, X25;  (6) 
+0x284c;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X8, X8, X8, #41;  (6) 
+0x2850;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:846;EOR	X23, X9, X25,LSL #17;  (6) 
+0x2854;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:844;EOR	X25, X9, X25;  (6) 
+0x2858;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X26, X10, X10, #19;  (6) 
+0x285c;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X8, X22;  (6) 
+0x2860;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:845;EOR	X22, X10, X22;  (6) 
+0x2864;/usr/include/boost/random/uniform_01.hpp:98;UCVTF	S12, X8, #64;  (6) 
+0x2868;/usr/include/boost/random/uniform_01.hpp:98;FCMP	S12, S9;  (6) 
+0x286c;/usr/include/boost/random/uniform_01.hpp:98;B.PL	2840 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x300>;  (6) 
+0x2870;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:443;FSQRT	S1, S13;
+0x2874;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:443;STR	Q1, [SP, #128];
+0x2878;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:443;HINT	#0;
+0x287c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:443;HINT	#0;
+0x2880;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X22, X26;  (7) 
+0x2884;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:842;EOR	X9, X22, X23;  (7) 
+0x2888;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:843;EOR	X10, X26, X25;  (7) 
+0x288c;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X8, X8, X8, #41;  (7) 
+0x2890;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:846;EOR	X23, X9, X25,LSL #17;  (7) 
+0x2894;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:844;EOR	X25, X9, X25;  (7) 
+0x2898;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667;EXTR	X26, X10, X10, #19;  (7) 
+0x289c;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:840;ADD	X8, X8, X22;  (7) 
+0x28a0;/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:845;EOR	X22, X10, X22;  (7) 
+0x28a4;/usr/include/boost/random/uniform_01.hpp:98;UCVTF	S1, X8, #64;  (7) 
+0x28a8;/usr/include/boost/random/uniform_01.hpp:98;FCMP	S1, S9;  (7) 
+0x28ac;/usr/include/boost/random/uniform_01.hpp:98;B.PL	2880 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x340>;  (7) 
+0x28b0;/usr/include/boost/random/normal_distribution.hpp:163;MOV	V2.S[1], V0.S[0];
+0x28b4;/usr/include/boost/random/normal_distribution.hpp:155;FSUB	S0, S9, S1;
+0x28b8;/usr/include/boost/random/normal_distribution.hpp:155;STR	Q2, [SP, #112];
+0x28bc;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:327;BL	16d0 <@plt_start@+0x50>;
+0x28c0;/usr/include/boost/random/normal_distribution.hpp:155;FMUL	S0, S0, S10;
+0x28c4;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;ADD	X0, SP, #156;
+0x28c8;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;ADD	X1, SP, #152;
+0x28cc;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:443;FSQRT	S0, S0;
+0x28d0;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:443;STR	Q0, [SP, #96];
+0x28d4;/usr/include/boost/random/normal_distribution.hpp:164;FMUL	S0, S12, S11;
+0x28d8;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;BL	1790 <@plt_start@+0x110>;
+0x28dc;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;LDR	S0, [SP, #152];
+0x28e0;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;LDR	Q1, [SP, #128];
+0x28e4;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182;LDR	Q2, [SP, #96];
+0x28e8;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;DUP	V1.2S, V1.S[0];
+0x28ec;/usr/include/boost/random/normal_distribution.hpp:163;LD1	{V0.S[1]}, [X24];
+0x28f0;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;DUP	V2.2S, V2.S[0];
+0x28f4;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;MOV	V1.D[1], V2.D[0];
+0x28f8;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;LDR	Q2, [SP, #112];
+0x28fc;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;MOV	V2.D[1], V0.D[0];
+0x2900;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;FMUL	V0.4S, V1.4S, V2.4S;
+0x2904;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;MOVI	V1.2D, #0;
+0x2908;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;FADD	V0.4S, V0.4S, V1.4S;
+0x290c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2857;LDP	Q1, Q2, [SP, #32];
+0x2910;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1558;FMUL	V0.4S, V0.4S, V2.S[0];
+0x2914;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1548;FADD	V0.4S, V1.4S, V0.4S;
+0x2918;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1548;LDR	Q1, [SP, #16];
+0x291c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1558;FMUL	V0.4S, V0.4S, V1.4S;
+0x2920;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:377;BL	17e0 <@plt_start@+0x160>;
+0x2924;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:377;LDP	Q1, Q2, [SP, #64];
+0x2928;/home/work/HackatonAlterNaN/Viridien/BSM.cxx:165;ADD	X8, X21, #1;
+0x292c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1558;FMUL	V0.4S, V2.4S, V0.4S;
+0x2930;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1553;FSUB	V0.4S, V0.4S, V1.4S;
+0x2934;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1660;MOVI	V1.2D, #0;
+0x2938;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1660;FMAXNM	V0.4S, V0.4S, V1.4S;
+0x293c;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2110;EXT	V1.16B, V0.16B, V0.16B, #8;
+0x2940;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1548;FADD	V0.2S, V0.2S, V1.2S;
+0x2944;/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1548;FADDP	S0, V0.2S;
+0x2948;/home/work/HackatonAlterNaN/Viridien/BSM.cxx:192;FCVT	D0, S0;
+0x294c;/home/work/HackatonAlterNaN/Viridien/BSM.cxx:192;FADD	D8, D8, D0;
+0x2950;/home/work/HackatonAlterNaN/Viridien/BSM.cxx:164;CMP	X21, X20;
+0x2954;/home/work/HackatonAlterNaN/Viridien/BSM.cxx:164;ORR	X21, XZR, X8;
+0x2958;/home/work/HackatonAlterNaN/Viridien/BSM.cxx:164;B.NE	27a0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x260>;

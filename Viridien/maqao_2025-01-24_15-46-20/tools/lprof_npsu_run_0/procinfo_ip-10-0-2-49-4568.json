@@ -1,0 +1,17 @@
+{
+  "content": {
+    "proc_name"          : "ARM_NEOVERSE_V2",
+    "hostname"           : "ip-10-0-2-49",
+    "architecture_code"  : "5",
+    "uarchitecture_code" : "26",
+    "architecture"       : "aarch64",
+    "uarchitecture"      : "ARM_NEOVERSE_V2",
+    "max_frequency"          : "0",
+    "cur_frequency"      : "0",
+    "driver_frequency"   : "NA",
+    "scaling_governor"   : "NA",
+    "huge_pages"         : "madvise",
+    "os_version"         : "Linux 5.10.230-223.885.amzn2.aarch64 #1 SMP Tue Dec 3 14:36:38 UTC 2024",
+    "is_lstopo"          : true,
+  }
+}

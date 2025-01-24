@@ -1,0 +1,345 @@
+{
+  "_cqa_text_report":
+    {
+      "_objects":
+        {
+          "image_col_maj":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/col_maj.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_4x32_256":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/4x32_256.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_1x64_128":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/1x64_128.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_4x32_512":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/4x32_512.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_8x32_512":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/8x32_512.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "list_path_1_cvt_1":
+            {
+              "dynamic": true,
+              "initial": "closed",
+              "type": "list",
+              "lines":
+                [
+                "/home/work/HackatonAlterNaN/Viridien/BSM.cxx:192"
+                ],
+              "header": ""
+            },
+          "image_2x64_512":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/2x64_512.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_1x64_256":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/1x64_256.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_vec_align":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/vec_align.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_row_maj":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/row_maj.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_1x32_128":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/1x32_128.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_2x64_256":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/2x64_256.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_1x32_256":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/1x32_256.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_1x64_512":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/1x64_512.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "image_1x32_512":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/1x32_512.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            },
+          "list_path_1_cvt_2":
+            {
+              "dynamic": true,
+              "initial": "closed",
+              "type": "list",
+              "lines":
+                [
+                "/usr/include/boost/random/uniform_01.hpp:98"
+                ],
+              "header": ""
+            },
+          "image_4x64_512":
+            {
+              "type": "image",
+              "format": "url",
+              "data": "../images/cqa/4x64_512.svg",
+              "size":
+                {
+                  "x": 500
+                }
+            }
+        },
+      "AVG":
+        {
+          "hint":
+            [
+              {
+                "workaround": "Avoid mixing data with different types. In particular, check if the type of constants is the same as array elements.",
+                "details": " - FCVT: 1 occurrences<<list_path_1_cvt_1>>\n - UCVTF: 1 occurrences<<list_path_1_cvt_2>>\n",
+                "title": "Conversion instructions",
+                "txt": "Detected expensive conversion instructions."
+              },
+              {
+                "title": "Matching between your loop (in the source code) and the binary loop",
+                "txt": "The binary loop is composed of 40 FP arithmetical operations:\n - 18: addition or subtraction\n - 20: multiply\n - 2: square root\nThe binary loop is loading 144 bytes.\nThe binary loop is storing 48 bytes."
+              },
+              {
+                "title": "Arithmetic intensity",
+                "txt": "Arithmetic intensity is 0.21 FP operations per loaded or stored byte."
+              }
+            ],
+          "expert":
+            [
+              {
+                "title": "General properties",
+                "txt": "nb instructions    : 75\nloop length        : 300\nnb stack references: 0\n"
+              },
+              {
+                "title": "Front-end",
+                "txt": "FIT IN UOP CACHE\nfront end: 8.13 cycles\n"
+              },
+              {
+                "title": "Back-end",
+                "txt": "       | P0   | P1   | P2   | P3   | P4   | P5   | P6   | P7   | P8   | P9   | P10  | P11  | P12  | P13  | P14  | P15  | P16\n-----------------------------------------------------------------------------------------------------------------------------\nuops   | 3.50 | 3.50 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 8.25 | 8.25 | 8.25 | 8.25 | 4.17 | 3.83 | 4.00 | 0.00 | 0.00\ncycles | 3.50 | 3.50 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 8.25 | 8.25 | 8.25 | 8.25 | 4.17 | 3.83 | 4.00 | 0.00 | 0.00\n\nExecution ports to units layout:\n - P0: BRU\n - P1: BRU\n - P2: ALU\n - P3: ALU\n - P4: ALU\n - P5: ALU\n - P6: ALU\n - P7: ALU\n - P8 (128 bits): VPU, FP store data, ALU, DIV/SQRT\n - P9 (128 bits): VPU, ALU, FP store data\n - P10 (128 bits): VPU, ALU, DIV/SQRT\n - P11 (128 bits): ALU, VPU\n - P12 (256 bits): store address, load\n - P13 (256 bits): store address, load\n - P14 (256 bits): load\n - P15 (64 bits): store data\n - P16 (64 bits): store data\n\nCycles executing div or sqrt instructions: 1.75-2.00\nLongest recurrence chain latency (RecMII): 16.00\n"
+              },
+              {
+                "title": "Cycles summary",
+                "txt": "Front-end : 8.13\nData deps.: 16.00\nOverall L1: 16.00\n"
+              },
+              {
+                "title": "Vectorization ratios",
+                "txt": "INT\nall    : 37%\nload   : 77%\nstore  : 100%\nmul    : NA (no mul vectorizable/vectorized instructions)\nadd-sub: 0%\nfma    : NA (no fma vectorizable/vectorized instructions)\nother  : 18%\nFP\nall     : 42%\nload    : NA (no load vectorizable/vectorized instructions)\nstore   : NA (no store vectorizable/vectorized instructions)\nmul     : 50%\nadd-sub : 50%\nfma     : NA (no fma vectorizable/vectorized instructions)\ndiv/sqrt: 0%\nother   : 33%\nINT+FP\nall     : 39%\nload    : 77%\nstore   : 100%\nmul     : 50%\nadd-sub : 26%\nfma     : NA (no fma vectorizable/vectorized instructions)\ndiv/sqrt: 0%\nother   : 21%\n"
+              },
+              {
+                "title": "Cycles and memory resources usage",
+                "txt": "Assuming all data fit into the L1 cache, each iteration of the binary loop takes 16.00 cycles. At this rate:\n - 9% of peak load performance is reached (9.00 out of 96.00 bytes loaded per cycle (GB/s @ 1GHz))\n - 6% of peak store performance is reached (3.00 out of 48.00 bytes stored per cycle (GB/s @ 1GHz))\n"
+              },
+              {
+                "title": "ASM code",
+                "txt": "In the binary file, the address of the loop is: 27a0\n\nInstruction                                                         | Nb FU | P0   | P1   | P2   | P3   | P4   | P5   | P6   | P7   | P8   | P9   | P10  | P11  | P12  | P13  | P14  | P15 | P16 | Latency | Recip. throughput | Vectorization\n----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nADD X8, X22, X26                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X9, X22, X23                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X10, X26, X25                                                   | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEXTR X8, X8, X8, #41                                                | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.67 | 0.67 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 0.50              | scal (50.0%)\nEOR X23, X9, X25,LSL #17                                            | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X25, X9, X25                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEXTR X26, X10, X10, #19                                             | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.67 | 0.67 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 0.50              | scal (50.0%)\nADD X8, X8, X22                                                     | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X22, X10, X22                                                   | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nUCVTF S12, X8, #64                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 1    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 1                 | scal (50.0%)\nFCMP S12, S9                                                        | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 1    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 2       | 1                 | scal (25.0%)\nB.PL 27a0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x260> | 1     | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nFSUB S0, S9, S0                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (25.0%)\nBL 16d0 <@plt_start@+0x50>                                          | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nFMUL S13, S0, S10                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nFMUL S0, S12, S11                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nADD X0, SP, #164                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nADD X1, SP, #160                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nBL 1790 <@plt_start@+0x110>                                         | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nLDP S2, S0, [SP, #160]                                              | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (50.0%)\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nFSQRT S1, S13                                                       | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0    | 0.50 | 0    | 0    | 0    | 0    | 0   | 0   | 7-9     | 0.87-1            | scal (25.0%)\nSTR Q1, [SP, #128]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0.50 | 0    | 0    | 0.50 | 0.50 | 0    | 0   | 0   | 2       | 0.50              | vect (100.0%)\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nMOV V2.S[1], V0.S[0]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (25.0%)\nFSUB S0, S9, S1                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (25.0%)\nSTR Q2, [SP, #112]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0.50 | 0    | 0    | 0.50 | 0.50 | 0    | 0   | 0   | 2       | 0.50              | vect (100.0%)\nBL 16d0 <@plt_start@+0x50>                                          | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nFMUL S0, S0, S10                                                    | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nADD X0, SP, #156                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nADD X1, SP, #152                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nFSQRT S0, S0                                                        | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0    | 0.50 | 0    | 0    | 0    | 0    | 0   | 0   | 7-9     | 0.87-1            | scal (25.0%)\nSTR Q0, [SP, #96]                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0.50 | 0    | 0    | 0.50 | 0.50 | 0    | 0   | 0   | 2       | 0.50              | vect (100.0%)\nFMUL S0, S12, S11                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nBL 1790 <@plt_start@+0x110>                                         | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nLDR S0, [SP, #152]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | scal (25.0%)\nLDR Q1, [SP, #128]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nLDR Q2, [SP, #96]                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nDUP V1.2S, V1.S[0]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (50.0%)\nLD1 {V0.S[1]}, [X24]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0.33 | 0.33 | 0.33 | 0   | 0   | 8       | 0.33              | scal (25.0%)\nDUP V2.2S, V2.S[0]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (50.0%)\nMOV V1.D[1], V2.D[0]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nLDR Q2, [SP, #112]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nMOV V2.D[1], V0.D[0]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFMUL V0.4S, V1.4S, V2.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nMOVI V1.2D, #0                                                      | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFADD V0.4S, V0.4S, V1.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nLDP Q1, Q2, [SP, #32]                                               | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.67              | vect (100.0%)\nFMUL V0.4S, V0.4S, V2.S[0]                                          | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nFADD V0.4S, V1.4S, V0.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nLDR Q1, [SP, #16]                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nFMUL V0.4S, V0.4S, V1.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nBL 17e0 <@plt_start@+0x160>                                         | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nLDP Q1, Q2, [SP, #64]                                               | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.67              | vect (100.0%)\nADD X8, X21, #1                                                     | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nFMUL V0.4S, V2.4S, V0.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nFSUB V0.4S, V0.4S, V1.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nMOVI V1.2D, #0                                                      | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFMAXNM V0.4S, V0.4S, V1.4S                                          | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nEXT V1.16B, V0.16B, V0.16B, #8                                      | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nFADD V0.2S, V0.2S, V1.2S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (50.0%)\nFADDP S0, V0.2S                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFCVT D0, S0                                                         | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0    | 0.50 | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 0.50              | scal (25.0%)\nFADD D8, D8, D0                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nCMP X21, X20                                                        | 1     | 0    | 0    | 0.25 | 0.25 | 0    | 0    | 0.25 | 0.25 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.33              | N/A\nORR X21, XZR, X8                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | N/A\nB.NE 27a0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x260> | 1     | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\n"
+              }
+            ],
+          "header":
+            [
+            "Warnings:\n - The number of fused uops of the instruction [HINT	#0] is unknown\n - Detected a function call instruction: ignoring called function instructions.\nRerun with --follow-calls=append to include them to analysis  or with --follow-calls=inline to simulate inlining.\n",
+            "7% of peak computational performance is used (2.50 out of 32.00 FLOP per cycle (GFLOPS @ 1GHz))"
+            ],
+          "brief":
+            [
+
+            ],
+          "gain":
+            [
+              {
+                "workaround": " - Try another compiler or update/tune your current one\n - Remove inter-iterations dependences from your loop and make it unit-stride:\n  * If your arrays have 2 or more dimensions, check whether elements are accessed contiguously and, otherwise, try to permute loops accordingly:\nC storage order is row-major: for(i) for(j) a[j][i] = b[j][i]; (slow, non stride 1) => for(i) for(j) a[i][j] = b[i][j]; (fast, stride 1)<<image_row_maj>>\n  * If your loop streams arrays of structures (AoS), try to use structures of arrays instead (SoA):\nfor(i) a[i].x = b[i].x; (slow, non stride 1) => for(i) a.x[i] = b.x[i]; (fast, stride 1)\n",
+                "details": "39% of VPU instructions are used in vector version (process two or more data elements in vector registers):\n - 77% of VPU loads are used in vector version.\n - 26% of VPU addition or subtraction instructions are used in vector version.\n - 50% of VPU multiply instructions are used in vector version.\n - 0% of VPU divide and square root instructions are used in vector version.\n - 21% of VPU instructions that are not load, store, addition, subtraction nor multiply instructions are used in vector version.\nSince your execution units are vector units, only a fully vectorized loop can use their full power.\n",
+                "title": "Vectorization",
+                "txt": "Your loop is poorly vectorized.\nOnly 60% of vector register length is used (average across all VPU instructions).\nBy fully vectorizing your loop, you can lower the cost of an iteration from 16.00 to 11.84 cycles (1.35x speedup)."
+              }
+            ],
+          "potential":
+            [
+              {
+                "workaround": "Try to change order in which elements are evaluated (using parentheses) in arithmetic expressions containing both ADD/SUB and MUL operations to enable your compiler to generate FMA instructions wherever possible.\nFor instance a + b*c is a valid FMA (MUL then ADD).\nHowever (a+b)* c cannot be translated into an FMA (ADD then MUL).",
+                "title": "FMA",
+                "txt": "Presence of both ADD/SUB and MUL operations."
+              }
+            ]
+        },
+      "paths":
+        [
+          {
+            "hint":
+              [
+                {
+                  "workaround": "Avoid mixing data with different types. In particular, check if the type of constants is the same as array elements.",
+                  "details": " - FCVT: 1 occurrences<<list_path_1_cvt_1>>\n - UCVTF: 1 occurrences<<list_path_1_cvt_2>>\n",
+                  "title": "Conversion instructions",
+                  "txt": "Detected expensive conversion instructions."
+                },
+                {
+                  "title": "Matching between your loop (in the source code) and the binary loop",
+                  "txt": "The binary loop is composed of 40 FP arithmetical operations:\n - 18: addition or subtraction\n - 20: multiply\n - 2: square root\nThe binary loop is loading 144 bytes.\nThe binary loop is storing 48 bytes."
+                },
+                {
+                  "title": "Arithmetic intensity",
+                  "txt": "Arithmetic intensity is 0.21 FP operations per loaded or stored byte."
+                }
+              ],
+            "expert":
+              [
+                {
+                  "title": "General properties",
+                  "txt": "nb instructions    : 75\nloop length        : 300\nnb stack references: 0\n"
+                },
+                {
+                  "title": "Front-end",
+                  "txt": "FIT IN UOP CACHE\nfront end: 8.13 cycles\n"
+                },
+                {
+                  "title": "Back-end",
+                  "txt": "       | P0   | P1   | P2   | P3   | P4   | P5   | P6   | P7   | P8   | P9   | P10  | P11  | P12  | P13  | P14  | P15  | P16\n-----------------------------------------------------------------------------------------------------------------------------\nuops   | 3.50 | 3.50 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 8.25 | 8.25 | 8.25 | 8.25 | 4.17 | 3.83 | 4.00 | 0.00 | 0.00\ncycles | 3.50 | 3.50 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 4.00 | 8.25 | 8.25 | 8.25 | 8.25 | 4.17 | 3.83 | 4.00 | 0.00 | 0.00\n\nExecution ports to units layout:\n - P0: BRU\n - P1: BRU\n - P2: ALU\n - P3: ALU\n - P4: ALU\n - P5: ALU\n - P6: ALU\n - P7: ALU\n - P8 (128 bits): VPU, FP store data, ALU, DIV/SQRT\n - P9 (128 bits): VPU, ALU, FP store data\n - P10 (128 bits): VPU, ALU, DIV/SQRT\n - P11 (128 bits): ALU, VPU\n - P12 (256 bits): store address, load\n - P13 (256 bits): store address, load\n - P14 (256 bits): load\n - P15 (64 bits): store data\n - P16 (64 bits): store data\n\nCycles executing div or sqrt instructions: 1.75-2.00\nLongest recurrence chain latency (RecMII): 16.00\n"
+                },
+                {
+                  "title": "Cycles summary",
+                  "txt": "Front-end : 8.13\nData deps.: 16.00\nOverall L1: 16.00\n"
+                },
+                {
+                  "title": "Vectorization ratios",
+                  "txt": "INT\nall    : 37%\nload   : 77%\nstore  : 100%\nmul    : NA (no mul vectorizable/vectorized instructions)\nadd-sub: 0%\nfma    : NA (no fma vectorizable/vectorized instructions)\nother  : 18%\nFP\nall     : 42%\nload    : NA (no load vectorizable/vectorized instructions)\nstore   : NA (no store vectorizable/vectorized instructions)\nmul     : 50%\nadd-sub : 50%\nfma     : NA (no fma vectorizable/vectorized instructions)\ndiv/sqrt: 0%\nother   : 33%\nINT+FP\nall     : 39%\nload    : 77%\nstore   : 100%\nmul     : 50%\nadd-sub : 26%\nfma     : NA (no fma vectorizable/vectorized instructions)\ndiv/sqrt: 0%\nother   : 21%\n"
+                },
+                {
+                  "title": "Cycles and memory resources usage",
+                  "txt": "Assuming all data fit into the L1 cache, each iteration of the binary loop takes 16.00 cycles. At this rate:\n - 9% of peak load performance is reached (9.00 out of 96.00 bytes loaded per cycle (GB/s @ 1GHz))\n - 6% of peak store performance is reached (3.00 out of 48.00 bytes stored per cycle (GB/s @ 1GHz))\n"
+                },
+                {
+                  "title": "ASM code",
+                  "txt": "In the binary file, the address of the loop is: 27a0\n\nInstruction                                                         | Nb FU | P0   | P1   | P2   | P3   | P4   | P5   | P6   | P7   | P8   | P9   | P10  | P11  | P12  | P13  | P14  | P15 | P16 | Latency | Recip. throughput | Vectorization\n----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nADD X8, X22, X26                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X9, X22, X23                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X10, X26, X25                                                   | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEXTR X8, X8, X8, #41                                                | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.67 | 0.67 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 0.50              | scal (50.0%)\nEOR X23, X9, X25,LSL #17                                            | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X25, X9, X25                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEXTR X26, X10, X10, #19                                             | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.67 | 0.67 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 0.50              | scal (50.0%)\nADD X8, X8, X22                                                     | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nEOR X22, X10, X22                                                   | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nUCVTF S12, X8, #64                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 1    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 1                 | scal (50.0%)\nFCMP S12, S9                                                        | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 1    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 2       | 1                 | scal (25.0%)\nB.PL 27a0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x260> | 1     | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nFSUB S0, S9, S0                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (25.0%)\nBL 16d0 <@plt_start@+0x50>                                          | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nFMUL S13, S0, S10                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nFMUL S0, S12, S11                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nADD X0, SP, #164                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nADD X1, SP, #160                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nBL 1790 <@plt_start@+0x110>                                         | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nLDP S2, S0, [SP, #160]                                              | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (50.0%)\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nFSQRT S1, S13                                                       | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0    | 0.50 | 0    | 0    | 0    | 0    | 0   | 0   | 7-9     | 0.87-1            | scal (25.0%)\nSTR Q1, [SP, #128]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0.50 | 0    | 0    | 0.50 | 0.50 | 0    | 0   | 0   | 2       | 0.50              | vect (100.0%)\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nHINT #0                                                             |       |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |     |     |         |                   | N/A\nMOV V2.S[1], V0.S[0]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (25.0%)\nFSUB S0, S9, S1                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (25.0%)\nSTR Q2, [SP, #112]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0.50 | 0    | 0    | 0.50 | 0.50 | 0    | 0   | 0   | 2       | 0.50              | vect (100.0%)\nBL 16d0 <@plt_start@+0x50>                                          | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nFMUL S0, S0, S10                                                    | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nADD X0, SP, #156                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nADD X1, SP, #152                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nFSQRT S0, S0                                                        | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0    | 0.50 | 0    | 0    | 0    | 0    | 0   | 0   | 7-9     | 0.87-1            | scal (25.0%)\nSTR Q0, [SP, #96]                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0.50 | 0    | 0    | 0.50 | 0.50 | 0    | 0   | 0   | 2       | 0.50              | vect (100.0%)\nFMUL S0, S12, S11                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | scal (25.0%)\nBL 1790 <@plt_start@+0x110>                                         | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nLDR S0, [SP, #152]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | scal (25.0%)\nLDR Q1, [SP, #128]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nLDR Q2, [SP, #96]                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nDUP V1.2S, V1.S[0]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (50.0%)\nLD1 {V0.S[1]}, [X24]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0.33 | 0.33 | 0.33 | 0   | 0   | 8       | 0.33              | scal (25.0%)\nDUP V2.2S, V2.S[0]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (50.0%)\nMOV V1.D[1], V2.D[0]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nLDR Q2, [SP, #112]                                                  | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nMOV V2.D[1], V0.D[0]                                                | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFMUL V0.4S, V1.4S, V2.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nMOVI V1.2D, #0                                                      | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFADD V0.4S, V0.4S, V1.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nLDP Q1, Q2, [SP, #32]                                               | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.67              | vect (100.0%)\nFMUL V0.4S, V0.4S, V2.S[0]                                          | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nFADD V0.4S, V1.4S, V0.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nLDR Q1, [SP, #16]                                                   | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.33              | vect (100.0%)\nFMUL V0.4S, V0.4S, V1.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nBL 17e0 <@plt_start@+0x160>                                         | 1     | 0.50 | 0.50 | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\nLDP Q1, Q2, [SP, #64]                                               | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.33 | 0.33 | 0.33 | 0   | 0   | 6       | 0.67              | vect (100.0%)\nADD X8, X21, #1                                                     | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | scal (50.0%)\nFMUL V0.4S, V2.4S, V0.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 3       | 0.25              | vect (100.0%)\nFSUB V0.4S, V0.4S, V1.4S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nMOVI V1.2D, #0                                                      | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFMAXNM V0.4S, V0.4S, V1.4S                                          | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nEXT V1.16B, V0.16B, V0.16B, #8                                      | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (100.0%)\nFADD V0.2S, V0.2S, V1.2S                                            | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | vect (50.0%)\nFADDP S0, V0.2S                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nFCVT D0, S0                                                         | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.50 | 0    | 0.50 | 0    | 0    | 0    | 0    | 0   | 0   | 3       | 0.50              | scal (25.0%)\nFADD D8, D8, D0                                                     | 1     | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0.25 | 0.25 | 0.25 | 0.25 | 0    | 0    | 0    | 0   | 0   | 2       | 0.25              | scal (50.0%)\nCMP X21, X20                                                        | 1     | 0    | 0    | 0.25 | 0.25 | 0    | 0    | 0.25 | 0.25 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.33              | N/A\nORR X21, XZR, X8                                                    | 1     | 0    | 0    | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0.17 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.17              | N/A\nB.NE 27a0 <_Z25black_scholes_monte_carloffffffm.omp_outlined+0x260> | 1     | 0.50 | 0.50 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0   | 0   | 1       | 0.50              | N/A\n"
+                }
+              ],
+            "header":
+              [
+              "Warnings:\n - The number of fused uops of the instruction [HINT	#0] is unknown\n - Detected a function call instruction: ignoring called function instructions.\nRerun with --follow-calls=append to include them to analysis  or with --follow-calls=inline to simulate inlining.\n",
+              "7% of peak computational performance is used (2.50 out of 32.00 FLOP per cycle (GFLOPS @ 1GHz))"
+              ],
+            "brief":
+              [
+
+              ],
+            "gain":
+              [
+                {
+                  "workaround": " - Try another compiler or update/tune your current one\n - Remove inter-iterations dependences from your loop and make it unit-stride:\n  * If your arrays have 2 or more dimensions, check whether elements are accessed contiguously and, otherwise, try to permute loops accordingly:\nC storage order is row-major: for(i) for(j) a[j][i] = b[j][i]; (slow, non stride 1) => for(i) for(j) a[i][j] = b[i][j]; (fast, stride 1)<<image_row_maj>>\n  * If your loop streams arrays of structures (AoS), try to use structures of arrays instead (SoA):\nfor(i) a[i].x = b[i].x; (slow, non stride 1) => for(i) a.x[i] = b.x[i]; (fast, stride 1)\n",
+                  "details": "39% of VPU instructions are used in vector version (process two or more data elements in vector registers):\n - 77% of VPU loads are used in vector version.\n - 26% of VPU addition or subtraction instructions are used in vector version.\n - 50% of VPU multiply instructions are used in vector version.\n - 0% of VPU divide and square root instructions are used in vector version.\n - 21% of VPU instructions that are not load, store, addition, subtraction nor multiply instructions are used in vector version.\nSince your execution units are vector units, only a fully vectorized loop can use their full power.\n",
+                  "title": "Vectorization",
+                  "txt": "Your loop is poorly vectorized.\nOnly 60% of vector register length is used (average across all VPU instructions).\nBy fully vectorizing your loop, you can lower the cost of an iteration from 16.00 to 11.84 cycles (1.35x speedup)."
+                }
+              ],
+            "potential":
+              [
+                {
+                  "workaround": "Try to change order in which elements are evaluated (using parentheses) in arithmetic expressions containing both ADD/SUB and MUL operations to enable your compiler to generate FMA instructions wherever possible.\nFor instance a + b*c is a valid FMA (MUL then ADD).\nHowever (a+b)* c cannot be translated into an FMA (ADD then MUL).",
+                  "title": "FMA",
+                  "txt": "Presence of both ADD/SUB and MUL operations."
+                }
+              ]
+          }
+        ],
+      "common":
+        {
+          "header":
+            [
+            "The loop is defined in:\n - /home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp:667,840-846\n - /home/work/HackatonAlterNaN/Viridien/BSM.cxx:164-165,192\n - /tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h:1548-1558,1660\n - /tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath:182,327,377,443\n - /tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h:2110,2857\n - /usr/include/boost/random/uniform_01.hpp:98\n - /usr/include/boost/random/normal_distribution.hpp:155,163-164\n\n",
+            "Warnings:\nNon-innermost loop: analyzing only self part (ignoring child loops)."
+            ],
+          "nb_paths": 1
+        }
+    }
+}

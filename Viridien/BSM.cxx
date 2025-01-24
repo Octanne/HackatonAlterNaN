@@ -73,8 +73,9 @@ You need to tune and parallelize the code to run for large # of simulations
 
 #define ui64 u_int64_t
 
+// REAL = float or double
 #ifndef REAL
-#define REAL long double
+#define REAL float
 #endif
 
 #ifndef INSTRUCTION
@@ -137,14 +138,14 @@ real gaussian_box_muller() {
 
 // Function to calculate the Black-Scholes call option price using Monte Carlo method
 real black_scholes_monte_carlo(real S0, real K, real T, real r, real sigma, real q, ui64 num_simulations) {
-    real sum_payoffs = real(0.0);
+    double sum_payoffs = 0.0;
 
 	#pragma omp parallel
 	{
 		//I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
 		//with the generator private to each thread
 		XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
-		boost::random::normal_distribution<real> distribution(0.0, 1.0);
+		boost::normal_distribution<real> distribution(0.0, 1.0);
 		//On calcule les parties qui changent pas une seule fois
 		//Gain de performance : 0 car le compilateur avait sans doute déjà fait l'optimisation rip
 		const real log_2 = real(1.44269504089);

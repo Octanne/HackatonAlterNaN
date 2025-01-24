@@ -1,0 +1,8 @@
+name;time_p;time_s;cpi_ratio;
+/tools/acfl/24.10/arm-linux-compiler-24.10.1_AmazonLinux-2/lib/libamath.so;56.868980407715;26.028940200806;;
+/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-46-20/binaries/BSM_2;42.936908721924;19.652229309082;;
+/tools/acfl/24.10/arm-linux-compiler-24.10.1_AmazonLinux-2/lib/libomp.so;0.17017842829227;0.077890686690807;;
+/usr/lib64/libc-2.26.so;0.017769634723663;0.0081331636756659;;
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib64/libstdc++.so.6.0.33;0.0034172376617789;0.0015640700003132;;
+[vdso];0.0020503425039351;0.00093844201182947;;
+/tools/acfl/24.10/arm-linux-compiler-24.10.1_AmazonLinux-2/lib/libastring.so;0.00068344752071425;0.00031281402334571;;

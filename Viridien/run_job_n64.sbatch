@@ -9,6 +9,6 @@
 #SBATCH --partition=c7g
 
 # Run the compiled executable
-./BSM 1000000 1000000
+./BSM_2 100000 1000000
 
 # End of job script

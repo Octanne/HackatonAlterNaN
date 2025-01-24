@@ -1,0 +1,27 @@
+
+* Info: "ref-cycles" not supported on ip-10-0-2-49: fallback to "cpu-clock"Using Boost 1.53.0
+Global initial seed: 1886016026      argv[1]= 100000     argv[2]= 1000000
+ value= 5.136911 in 46.119296 seconds
+Performance in seconds : 46.119
+
+* Info: Dumping samples (host ip-10-0-2-49, process 9926)
+* Info: Dumping source info for callchain nodes (host ip-10-0-2-49, process 9926)
+* Info: Building/writing metadata (host ip-10-0-2-49)
+* Info: Finished collect step (host ip-10-0-2-49, process 9926)
+
+Your experiment path is /home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0
+
+To display your profiling results:
+#################################################################################################################################################
+#    LEVEL    |     REPORT     |                                                    COMMAND                                                     #
+#################################################################################################################################################
+#  Functions  |  Cluster-wide  |  maqao lprof -df xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0      #
+#  Functions  |  Per-node      |  maqao lprof -df -dn xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0  #
+#  Functions  |  Per-process   |  maqao lprof -df -dp xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0  #
+#  Functions  |  Per-thread    |  maqao lprof -df -dt xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0  #
+#  Loops      |  Cluster-wide  |  maqao lprof -dl xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0      #
+#  Loops      |  Per-node      |  maqao lprof -dl -dn xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0  #
+#  Loops      |  Per-process   |  maqao lprof -dl -dp xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0  #
+#  Loops      |  Per-thread    |  maqao lprof -dl -dt xp=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-26-43/tools/lprof_npsu_run_0  #
+#################################################################################################################################################
+

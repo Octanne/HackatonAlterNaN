@@ -1,0 +1,16 @@
+********************************************************************************
+MAQAO 2.21.1 - a9bb74606c7e260f7f87782e64f16b00a6f20c1b::20250121-112452 || 2025/01/21
+./maqao oneview -R1 -- ./BSM_2 100000 1000000 
+CPY:  [true] ./BSM_2 --> /home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-46-20/binaries/BSM_2
+CMD:   /home/work/HackatonAlterNaN/Viridien/./maqao lprof _caller=oneview  --xp="/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-46-20/tools/lprof_npsu_run_0" --mpi-command="" --collect-CPU-time-intervals --collect-topology   -- /home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-46-20/binaries/BSM_2  100000 1000000
+In run run_0, 1 loops were discarded from static analysis because their coverage
+are lower than object_coverage_threshold value (0.01%).
+That represents 0.0013668950414285% of the execution time. To include them, change the value
+in the experiment directory configuration file, then rerun the command with the additionnal parameter
+--force-static-analysis
+26 functions were discarded from static analysis because their coverage
+are lower than object_coverage_threshold value (0.01%).
+That represents 0.043740641500335% of the execution time. To include them, change the value
+in the experiment directory configuration file, then rerun the command with the additionnal parameter
+--force-static-analysis
+CMD:  /home/work/HackatonAlterNaN/Viridien/./maqao otter  -input=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-46-20/OTTER/input_manifest.csv -output=/home/work/HackatonAlterNaN/Viridien/maqao_2025-01-24_15-46-20/OTTER/output_manifest.csv

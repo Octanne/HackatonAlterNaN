@@ -1,4 +1,4 @@
 Using Boost 1.53.0
-Global initial seed: 558780370      argv[1]= 100000     argv[2]= 1000000
- value= 5.136973 in 13.956365 seconds
-Performance in seconds : 13.956
+Global initial seed: 1637870075      argv[1]= 100000     argv[2]= 1000000
+ value= 5.136931 in 13.952045 seconds
+Performance in seconds : 13.952

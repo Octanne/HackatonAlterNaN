@@ -34,13 +34,13 @@ do
     echo "# End of job script" >> $benchmark_script
 
     # Submit the job with dependency
-    # if [[ -z "$last_c8g_job_id" ]]; then
-    #     # Submit the first job without dependency
-    #     last_c8g_job_id=$(sbatch $benchmark_script | awk '{print $4}')
-    # else
-    #     # Submit the subsequent jobs with dependency
-    #     last_c8g_job_id=$(sbatch --dependency=afterok:$last_c8g_job_id $benchmark_script | awk '{print $4}')
-    # fi
+    if [[ -z "$last_c8g_job_id" ]]; then
+        # Submit the first job without dependency
+        last_c8g_job_id=$(sbatch $benchmark_script | awk '{print $4}')
+    else
+        # Submit the subsequent jobs with dependency
+        last_c8g_job_id=$(sbatch --dependency=afterok:$last_c8g_job_id $benchmark_script | awk '{print $4}')
+    fi
 done
 
 # Create and submit jobs for C7G

@@ -1,0 +1,4 @@
+module;src_file;score;issue;opts;
+BSM;BSM.cxx;0.16666666666667;"-g is missing for some functions (possibly ones added by the compiler), but debug locations are available. Some analysis may be inaccurate.";"Arm C/C++/Fortran Compiler version 24.10.1 (build number 4) (based on LLVM 19.1.0) ";
+BSM;BSM.cxx;;"-O2, -O3 or -Ofast is missing. ";"";
+BSM;BSM.cxx;;"-mcpu=native is missing.";"";

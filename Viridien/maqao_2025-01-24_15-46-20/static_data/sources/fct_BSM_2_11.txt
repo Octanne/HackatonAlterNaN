@@ -1,0 +1,104 @@
+/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp: 667 - 846
+--------------------------------------------------------------------------------
+
+667: 			return (x << s) | (x >> (64 - s));
+[...]
+840: 		const std::uint64_t result = detail::RotL(m_state[0] + m_state[3], 23) + m_state[0];
+841: 		const std::uint64_t t = m_state[1] << 17;
+842: 		m_state[2] ^= m_state[0];
+843: 		m_state[3] ^= m_state[1];
+844: 		m_state[1] ^= m_state[2];
+845: 		m_state[0] ^= m_state[3];
+846: 		m_state[2] ^= t;
+/home/work/HackatonAlterNaN/Viridien/BSM.cxx: 143 - 196
+--------------------------------------------------------------------------------
+
+143: 	#pragma omp parallel
+144: 	{
+145: 		//I want to initialize the generator only once in each thread as a private variable, then parallelize the for loop
+146: 		//with the generator private to each thread
+147: 		XoshiroCpp::Xoshiro256PlusPlus generator(std::random_device{}());
+[...]
+164: 		#pragma omp for reduction(+:sum_payoffs)
+165: 		for (ui64 i = 0; i < num_simulations; i += SIMD_WIDTH) {
+[...]
+192: 			local_sum += std::experimental::reduce(payoff);
+193: 		}
+194: 
+195: 		#pragma omp atomic
+196: 		sum_payoffs += local_sum;
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h: 1548 - 1660
+--------------------------------------------------------------------------------
+
+1548:       { return __x._M_data + __y._M_data; }
+1549: 
+1550:     template <typename _Tp, size_t _Np>
+1551:       _GLIBCXX_SIMD_INTRINSIC static constexpr _SimdWrapper<_Tp, _Np>
+1552:       _S_minus(_SimdWrapper<_Tp, _Np> __x, _SimdWrapper<_Tp, _Np> __y)
+1553:       { return __x._M_data - __y._M_data; }
+1554: 
+1555:     template <typename _Tp, size_t _Np>
+1556:       _GLIBCXX_SIMD_INTRINSIC static constexpr _SimdWrapper<_Tp, _Np>
+1557:       _S_multiplies(_SimdWrapper<_Tp, _Np> __x, _SimdWrapper<_Tp, _Np> __y)
+1558:       { return __x._M_data * __y._M_data; }
+[...]
+1660:       { return __a._M_data > __b._M_data ? __a._M_data : __b._M_data; }
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath: 182 - 443
+--------------------------------------------------------------------------------
+
+182:   { return __builtin_cosf(__x); }
+[...]
+327:   { return __builtin_logf(__x); }
+[...]
+377:   { return __builtin_powf(__x, __y); }
+[...]
+443:   { return __builtin_sqrtf(__x); }
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h: 2110 - 2857
+--------------------------------------------------------------------------------
+
+2110: 	const auto __r = __builtin_shufflevector(__x, __y, [=] {
+[...]
+2857: 	_M_data[__i] = __x;
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/bits/new_allocator.h: 172 - 172
+--------------------------------------------------------------------------------
+
+172: 	_GLIBCXX_OPERATOR_DELETE(_GLIBCXX_SIZED_DEALLOC(__p, __n));
+/usr/include/boost/random/uniform_01.hpp: 98 - 98
+--------------------------------------------------------------------------------
+
+98:       result_type result = result_type(eng() - (eng.min)()) * factor;
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/bits/random.h: 1760 - 1782
+--------------------------------------------------------------------------------
+
+1760:     random_device() { _M_init("default"); }
+[...]
+1766:     { _M_fini(); }
+[...]
+1782:     { return this->_M_getval(); }
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/bits/char_traits.h: 350 - 427
+--------------------------------------------------------------------------------
+
+350: 	__c1 = __c2;
+[...]
+427: 	return static_cast<char_type*>(__builtin_memcpy(__s1, __s2, __n));
+/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/bits/basic_string.h: 194 - 294
+--------------------------------------------------------------------------------
+
+194: 	: allocator_type(__a), _M_p(__dat) { }
+[...]
+228:       { return _M_dataplus._M_p; }
+[...]
+235: 	return std::pointer_traits<pointer>::pointer_to(*_M_local_buf);
+[...]
+269: 	if (_M_data() == _M_local_data())
+[...]
+288: 	  _M_destroy(_M_allocated_capacity);
+[...]
+294:       { _Alloc_traits::deallocate(_M_get_allocator(), _M_data(), __size + 1); }
+/usr/include/boost/random/normal_distribution.hpp: 155 - 164
+--------------------------------------------------------------------------------
+
+155:             _cached_rho = sqrt(-result_type(2) * log(result_type(1)-_r2));
+[...]
+163:         return _cached_rho * (_valid ?
+164:                               cos(result_type(2)*pi*_r1) :

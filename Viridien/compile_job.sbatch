@@ -10,6 +10,7 @@
 module load armpl/24.10.1
 
 # Compilation command
-armclang++ -g -O3 -DREAL=float -mcpu=native -march=armv8-a+sve -ftree-vectorize -flto -std=c++17 -fopenmp -o BSM BSM.cxx -lboost_random
+armclang++ -g -O3 -mcpu=native -march=armv8-a+sve -ftree-vectorize -flto -std=c++17 -fopenmp -o BSM BSM.cxx -lboost_random
+#armclang++ -g -O3 -fopenmp -o BSM BSM.cxx -lboost_random
 
 # End of job script

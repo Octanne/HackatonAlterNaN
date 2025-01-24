@@ -140,13 +140,6 @@ RUN . /opt/aster/*/*/*_mpi.sh && \
     ./waf configure --prefix=/opt/aster/install/mpi && \
     ./waf install -j $(nproc)
 
-# Clean up
-RUN apt-get install -y sudo && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Check if installation pass Validation
-#WORKDIR /root
-#RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3 ; exit 0
-
 # We add user 
 # Create a new user 'aster'
 # Create the user, set the password, and add to groups
@@ -154,6 +147,13 @@ RUN useradd -m -s /bin/bash aster \
     && echo "aster:aster" | chpasswd \
     && usermod -aG sudo aster \
     && usermod -aG root aster
+
+# Clean up
+RUN apt-get install -y sudo && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Check if installation pass Validation
+#WORKDIR /root
+#RUN /opt/aster/install/mpi/bin/run_ctest -L submit -LE need_data --resutest=/tmp/resu_submit --timefactor=3 ; exit 0
 
 USER aster
 # Add the line to source the script in .bashrc

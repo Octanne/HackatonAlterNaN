@@ -1,0 +1,227 @@
+{
+  "__fct":
+    {
+      "loops":
+        {
+          "_3":
+            {
+              "_6":
+                {
+                  "src_regions":
+                    [
+                      {
+                        "path": "/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp",
+                        "regions":
+                          [
+                            [
+                            667,
+                            667
+                            ],
+                            [
+                            840,
+                            846
+                            ]
+                          ]
+                      },
+                      {
+                        "path": "/usr/include/boost/random/uniform_01.hpp",
+                        "regions":
+                          [
+                            [
+                            98,
+                            98
+                            ]
+                          ]
+                      }
+                    ],
+                  "src": "uniform_01.hpp:98-98"
+                },
+              "_5":
+                {
+                  "src_regions":
+                    [
+                      {
+                        "path": "/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp",
+                        "regions":
+                          [
+                            [
+                            667,
+                            667
+                            ],
+                            [
+                            840,
+                            846
+                            ]
+                          ]
+                      },
+                      {
+                        "path": "/usr/include/boost/random/uniform_01.hpp",
+                        "regions":
+                          [
+                            [
+                            98,
+                            98
+                            ]
+                          ]
+                      }
+                    ],
+                  "src": "uniform_01.hpp:98-98"
+                },
+              "_4":
+                {
+                  "src_regions":
+                    [
+                      {
+                        "path": "/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp",
+                        "regions":
+                          [
+                            [
+                            667,
+                            667
+                            ],
+                            [
+                            840,
+                            846
+                            ]
+                          ]
+                      },
+                      {
+                        "path": "/usr/include/boost/random/uniform_01.hpp",
+                        "regions":
+                          [
+                            [
+                            98,
+                            98
+                            ]
+                          ]
+                      }
+                    ],
+                  "src": "uniform_01.hpp:98-98"
+                },
+              "src_regions":
+                [
+                  {
+                    "path": "/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp",
+                    "regions":
+                      [
+                        [
+                        667,
+                        667
+                        ],
+                        [
+                        840,
+                        846
+                        ]
+                      ]
+                  },
+                  {
+                    "path": "/home/work/HackatonAlterNaN/Viridien/BSM.cxx",
+                    "regions":
+                      [
+                        [
+                        162,
+                        163
+                        ],
+                        [
+                        190,
+                        190
+                        ]
+                      ]
+                  },
+                  {
+                    "path": "/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd_builtin.h",
+                    "regions":
+                      [
+                        [
+                        1548,
+                        1558
+                        ],
+                        [
+                        1660,
+                        1660
+                        ]
+                      ]
+                  },
+                  {
+                    "path": "/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/cmath",
+                    "regions":
+                      [
+                        [
+                        182,
+                        182
+                        ],
+                        [
+                        327,
+                        327
+                        ],
+                        [
+                        377,
+                        377
+                        ],
+                        [
+                        443,
+                        443
+                        ]
+                      ]
+                  },
+                  {
+                    "path": "/tools/acfl/24.10/gcc-14.2.0_AmazonLinux-2/lib/gcc/aarch64-linux-gnu/14.2.0/../../../../include/c++/14.2.0/experimental/bits/simd.h",
+                    "regions":
+                      [
+                        [
+                        2110,
+                        2110
+                        ],
+                        [
+                        2857,
+                        2857
+                        ]
+                      ]
+                  },
+                  {
+                    "path": "/usr/include/boost/random/uniform_01.hpp",
+                    "regions":
+                      [
+                        [
+                        98,
+                        98
+                        ]
+                      ]
+                  },
+                  {
+                    "path": "/usr/include/boost/random/normal_distribution.hpp",
+                    "regions":
+                      [
+                        [
+                        155,
+                        155
+                        ],
+                        [
+                        163,
+                        164
+                        ]
+                      ]
+                  }
+                ],
+              "src": "BSM.cxx:162-190"
+            },
+          "_2":
+            {
+              "src_regions":
+                [
+                  {
+                    "path": "/home/work/HackatonAlterNaN/Viridien/BSM.cxx",
+                    "regions":
+                      [
+                        [
+                        162,
+                        162
+                        ]
+                      ]
+                  }
+                ],
+              "src": "BSM.cxx:162-162"
+            }
+        }
+    }
+}

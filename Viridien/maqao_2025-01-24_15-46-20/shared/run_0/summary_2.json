@@ -1,0 +1,88 @@
+{
+  "report": [
+    {
+      "id_str": "Loop 4 - BSM_2",
+      "module": "BSM_2",
+      "id": 4,
+      "analysis": "Execution Time: 37 % - Vectorization Ratio: 39.29 % - Vector Length Use: 60.27 %",
+      "coverage": 37.001850128174,
+      "issues": [
+        {
+          "id_str": "Loop Computation Issues",
+          "score": 12,
+          "issues": [
+            {
+              "code": "L2_LC_2",
+              "analysis": "[SA] Presence of expensive FP instructions - Perform hoisting, change algorithm, use SVML or proper numerical library or perform value profiling (count the number of distinct input values). There are 2 issues (= instructions) costing 4 points each.",
+              "score": 8,
+            },
+            {
+              "code": "L2_LC_4",
+              "analysis": "[SA] Less than 10% of the FP ADD/SUB/MUL arithmetic operations are performed using FMA - Reorganize arithmetic expressions to exhibit potential for FMA. This issue costs 4 points.",
+              "score": 4,
+            }
+          ]
+        },
+        {
+          "id_str": "Control Flow Issues",
+          "score": 3,
+          "issues": [
+            {
+              "code": "L2_CF_1",
+              "analysis": "[SA] Presence of calls - Inline either by compiler or by hand and use SVML for libm calls. There are 1 issues (= calls) costing 1 point each.",
+              "score": 1,
+            },
+            {
+              "code": "L2_CF_4",
+              "analysis": "[SA] Non innermost loop (Outermost) - Collapse loop with innermost ones. This issue costs 2 points.",
+              "score": 2,
+            }
+          ]
+        },
+        {
+          "id_str": "Vectorization Roadblocks",
+          "score": 3,
+          "issues": [
+            {
+              "code": "L2_CF_1",
+              "analysis": "[SA] Presence of calls - Inline either by compiler or by hand and use SVML for libm calls. There are 1 issues (= calls) costing 1 point each.",
+              "score": 1,
+            },
+            {
+              "code": "L2_CF_4",
+              "analysis": "[SA] Non innermost loop (Outermost) - Collapse loop with innermost ones. This issue costs 2 points.",
+              "score": 2,
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id_str": "Loop 5 - BSM_2",
+      "module": "BSM_2",
+      "id": 5,
+      "analysis": "Execution Time: 1 % - Vectorization Ratio: 0.00 % - Vector Length Use: 47.50 %",
+      "coverage": 1.2479751110077,
+      "issues": [
+      ]
+    },
+    {
+      "id_str": "Loop 6 - BSM_2",
+      "module": "BSM_2",
+      "id": 6,
+      "analysis": "Execution Time: 1 % - Vectorization Ratio: 0.00 % - Vector Length Use: 47.50 %",
+      "coverage": 1.1919324398041,
+      "issues": [
+      ]
+    },
+    {
+      "id_str": "Loop 7 - BSM_2",
+      "module": "BSM_2",
+      "id": 7,
+      "analysis": "Execution Time: 1 % - Vectorization Ratio: 0.00 % - Vector Length Use: 47.50 %",
+      "coverage": 1.0853146314621,
+      "issues": [
+      ]
+    }
+  ]
+}

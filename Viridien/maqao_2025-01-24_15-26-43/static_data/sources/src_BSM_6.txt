@@ -1,0 +1,16 @@
+/home/work/HackatonAlterNaN/Viridien/./XoshiroCpp.hpp: 667 - 846
+--------------------------------------------------------------------------------
+
+667: 			return (x << s) | (x >> (64 - s));
+[...]
+840: 		const std::uint64_t result = detail::RotL(m_state[0] + m_state[3], 23) + m_state[0];
+841: 		const std::uint64_t t = m_state[1] << 17;
+842: 		m_state[2] ^= m_state[0];
+843: 		m_state[3] ^= m_state[1];
+844: 		m_state[1] ^= m_state[2];
+845: 		m_state[0] ^= m_state[3];
+846: 		m_state[2] ^= t;
+/usr/include/boost/random/uniform_01.hpp: 98 - 98
+--------------------------------------------------------------------------------
+
+98:       result_type result = result_type(eng() - (eng.min)()) * factor;
