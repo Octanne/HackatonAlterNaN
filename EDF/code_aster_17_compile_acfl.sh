@@ -45,16 +45,17 @@ if [ ! -d "${PYTHON39}" ] ; then
 fi
 
 # PATH Setting UP
-export PATH=${PYTHON39}/bin:${ACFL_TO_GCC_LINK}:${MPI_DIR}/bin:${PATH}
+export PATH=${PYTHON39}/bin:${ACFL_TO_GCC_LINK}:${PATH}
 #LD_LIBRARY_PATH=${ACFL_DIR}/lib64:${MPI_DIR}/lib:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=${PYTHON39}/lib:$LD_LIBRARY_PATH
 
 # Module load
 module unload all
-module use /tools/acfl/24.10/modulefiles
 module use /tools/acfl/24.04/modulefiles
+module use ~/modules_acfl/
 module load acfl/24.04
-module load openmpi/4.1.6
+module load openblas/24.04
+module load openmpi/4.1.7
 
 # PATH Setting UP
 PATH=${PYVENV_CAS}/bin:${PATH}
@@ -69,6 +70,9 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   ln -s ${ACFL_DIR}/bin/armclang++ ${ACFL_TO_GCC_LINK}/g++
   ln -s ${ACFL_DIR}/bin/armflang ${ACFL_TO_GCC_LINK}/gfortran
   ln -s $PYTHON39/bin/python3.9 ${ACFL_TO_GCC_LINK}/python3
+
+  # For BLACS in Scalapack adding :
+  # -DCMAKE_C_FLAGS="${CFLAGS} -fpermissive -Wno-error=implicit-function-declaration" \
 
   # Prerequisites DL
   wget https://www.code-aster.org/FICHIERS/prerequisites/codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
