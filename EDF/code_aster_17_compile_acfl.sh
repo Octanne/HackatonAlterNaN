@@ -31,7 +31,9 @@ export BOOST_ROOT=${HOME}/boost-build
 # cd ../
 # make config shared=1 cc=gcc prefix=${HOME}/metis-build
 # make install
-
+export C_INCLUDE_PATH=${HOME}/metis-build/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=${HOME}/metis-build/include:$CPLUS_INCLUDE_PATH
+export LIBRARY_PATH==${HOME}/metis-build/lib:$LIBRARY_PATH
 export LD_LIBRARY_PATH=${HOME}/metis-build/lib:$LD_LIBRARY_PATH
 export CPATH=${HOME}/metis-build/include:$CPATH
 
