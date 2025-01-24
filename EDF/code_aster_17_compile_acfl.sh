@@ -91,6 +91,9 @@ if [ ! -d "${COMPILE_ROOT}" ]; then
   # For BLACS in Scalapack adding :
   # -DCMAKE_C_FLAGS="${CFLAGS} -fpermissive -Wno-error=implicit-function-declaration" \
 
+  # For MUMPS : 
+  # Uncomment line 106 of src/mumps.sh
+
   # Prerequisites DL
   wget https://www.code-aster.org/FICHIERS/prerequisites/codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
   tar xzf codeaster-prerequisites-${VERSION_CAS}-oss.tar.gz
