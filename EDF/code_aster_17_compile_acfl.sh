@@ -71,6 +71,7 @@ module unuse ${HOME}/modules_locales/modulefiles
 module use /tools/acfl/24.04/modulefiles
 module use ${HOME}/modules_locales/modulefiles
 module load acfl/24.04
+module load acfl-24.04/metis/5.1.1
 module load acfl-24.04/openblas/r0.3.20
 module load acfl-24.04/openmpi/4.1.7
 module load acfl-24.04/boost-libs/1.73.0
